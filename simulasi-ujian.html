@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi Ujian Seleksi · TPA, TKDA, IQ, Buta Warna &amp; Akademik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#11161d;
+    --bg-soft:#171d26;
+    --line:#2a323d;
+    --paper:#f7f4ec;
+    --paper-2:#efe9da;
+    --ink:#1b2430;
+    --ink-soft:#5a6472;
+    --accent:#e0a458;
+    --accent-ink:#5b3c14;
+    --blue:#4f7cac;
+    --purple:#6b5ca5;
+    --green:#3f9142;
+    --orange:#c77f3b;
+    --pink:#b5538c;
+    --red:#c1453d;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--paper);
+    font-family:'IBM Plex Sans',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:'Space Grotesk',sans-serif;
+    margin:0 0 .4em 0;
+    letter-spacing:-.01em;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  button{font-family:inherit;}
+  a{color:var(--accent);}
+  ::selection{background:var(--accent);color:var(--accent-ink);}
+
+  /* ---------- layout shells ---------- */
+  .screen{display:none;}
+  .screen.active{display:block;}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px;}
+
+  /* ---------- start screen ---------- */
+  .cover{
+    background:
+      repeating-linear-gradient(0deg, transparent 0 39px, rgba(247,244,236,.035) 39px 40px),
+      linear-gradient(160deg,#161c25,#0e1318 70%);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:40px 36px;
+    position:relative;
+    overflow:hidden;
+  }
+  .cover::before{
+    content:"";
+    position:absolute; top:-60px; right:-60px;
+    width:240px;height:240px;border-radius:50%;
+    background:radial-gradient(circle, rgba(224,164,88,.18), transparent 70%);
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--accent); border:1px solid rgba(224,164,88,.4);
+    padding:5px 12px; border-radius:999px; margin-bottom:18px;
+  }
+  .cover h1{font-size:clamp(28px,4vw,42px); max-width:680px;}
+  .cover p.lead{color:#c7cdd6; max-width:560px; font-size:16px; line-height:1.65;}
+  .nopeserta{
+    margin-top:28px; display:flex; gap:28px; flex-wrap:wrap;
+    font-family:'IBM Plex Mono',monospace; font-size:13px; color:#9aa3b0;
+  }
+  .nopeserta b{color:var(--paper); font-weight:600;}
+
+  .cat-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:14px; margin-top:30px;
+  }
+  .cat-card{
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:12px;
+    padding:16px 16px 14px; position:relative;
+  }
+  .cat-card .dot{
+    width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px;
+  }
+  .cat-card h4{font-size:15px; display:flex; align-items:center; margin-bottom:6px;}
+  .cat-card p{font-size:13px; color:#9aa3b0; margin:0; line-height:1.5;}
+  .cat-card .n{
+    position:absolute; top:14px; right:16px; font-family:'IBM Plex Mono',monospace;
+    font-size:12px; color:#6f7886;
+  }
+
+  .start-actions{margin-top:34px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
+  .btn{
+    border:none; cursor:pointer; border-radius:10px; font-weight:600;
+    font-size:15px; padding:14px 26px; transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{
+    background:var(--accent); color:var(--accent-ink);
+    box-shadow:0 6px 0 #a87936;
+  }
+  .btn-primary:hover{box-shadow:0 4px 0 #a87936; transform:translateY(2px);}
+  .btn-ghost{
+    background:transparent; color:var(--paper); border:1px solid var(--line);
+  }
+  .btn-ghost:hover{border-color:var(--accent); color:var(--accent);}
+  .small-note{font-size:13px; color:#7f8896;}
+
+  /* ---------- quiz screen ---------- */
+  .quiz-shell{display:grid; grid-template-columns:260px 1fr; gap:22px; align-items:start;}
+  @media (max-width:880px){ .quiz-shell{grid-template-columns:1fr;} }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:12px;
+    padding:12px 18px; margin-bottom:18px; flex-wrap:wrap;
+  }
+  .topbar .timer{font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent);}
+  .progress-track{
+    flex:1; min-width:140px; height:8px; background:#222a34; border-radius:99px; overflow:hidden;
+  }
+  .progress-fill{height:100%; background:linear-gradient(90deg,var(--accent),#f0c27e); width:0%; transition:width .3s ease;}
+  .progress-label{font-size:12.5px; color:#9aa3b0; white-space:nowrap;}
+
+  .nav-panel{
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:12px; padding:16px;
+    position:sticky; top:16px;
+  }
+  .nav-panel h4{font-size:12.5px; text-transform:uppercase; letter-spacing:.08em; color:#9aa3b0; margin-bottom:10px;}
+  .legend{display:flex; flex-wrap:wrap; gap:10px; font-size:11.5px; color:#9aa3b0; margin-bottom:12px;}
+  .legend span{display:inline-flex; align-items:center; gap:5px;}
+  .legend i{width:9px;height:9px;border-radius:3px;display:inline-block;}
+  .navgrid{display:grid; grid-template-columns:repeat(8,1fr); gap:6px;}
+  @media (max-width:880px){ .navgrid{grid-template-columns:repeat(10,1fr);} }
+  .navgrid button{
+    aspect-ratio:1; border-radius:6px; border:1px solid var(--line);
+    background:#1b222c; color:#aab2bd; font-family:'IBM Plex Mono',monospace; font-size:11px;
+    cursor:pointer; position:relative;
+  }
+  .navgrid button.answered{background:rgba(224,164,88,.18); border-color:var(--accent); color:var(--accent);}
+  .navgrid button.current{outline:2px solid var(--blue); outline-offset:1px;}
+  .navgrid button.flag::after{
+    content:""; position:absolute; top:-3px; right:-3px; width:7px;height:7px;border-radius:50%;
+    background:var(--orange); border:1px solid var(--bg-soft);
+  }
+  .nav-cat-tag{font-size:11px; color:#6f7886; margin:14px 0 4px;}
+
+  .qcard{
+    background:var(--paper); color:var(--ink); border-radius:var(--radius);
+    padding:30px 30px 26px; min-height:420px; display:flex; flex-direction:column;
+    box-shadow:0 18px 40px rgba(0,0,0,.35);
+  }
+  .qmeta{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px;
+  }
+  .qmeta .badge{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; text-transform:uppercase; letter-spacing:.07em;
+    padding:5px 10px; border-radius:99px; color:#fff;
+  }
+  .qmeta .qnum{font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--ink-soft);}
+  .qtext{font-size:18px; line-height:1.6; font-weight:500; margin-bottom:6px;}
+  .qsub{font-size:13.5px; color:var(--ink-soft); margin-bottom:18px; line-height:1.6; background:var(--paper-2); padding:12px 14px; border-radius:8px;}
+
+  .ishi-box{display:flex; justify-content:center; margin:6px 0 20px;}
+  .ishihara-svg{width:230px; height:230px; border-radius:50%; box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);}
+
+  .options{display:flex; flex-direction:column; gap:10px; margin-top:auto; padding-top:10px;}
+  .opt{
+    display:flex; align-items:center; gap:14px; text-align:left;
+    background:#fff; border:1.5px solid #e3ddcc; border-radius:11px; padding:13px 16px;
+    cursor:pointer; transition:border-color .15s, background .15s, transform .1s;
+    font-size:15px; color:var(--ink);
+  }
+  .opt:hover{border-color:var(--blue);}
+  .opt:active{transform:scale(.995);}
+  .opt .bubble{
+    flex:none; width:30px; height:30px; border-radius:50%; border:2px solid #c9c0a8;
+    display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace;
+    font-weight:600; font-size:13px; color:#8a8268; transition:all .18s;
+  }
+  .opt.selected{border-color:var(--accent); background:#fdf6ea;}
+  .opt.selected .bubble{
+    background:var(--accent); border-color:var(--accent); color:var(--accent-ink);
+  }
+
+  .qfooter{
+    display:flex; align-items:center; justify-content:space-between; margin-top:22px; gap:10px; flex-wrap:wrap;
+  }
+  .qfooter .left-actions{display:flex; gap:10px;}
+  .link-btn{
+    background:none; border:none; color:var(--ink-soft); font-size:13.5px; cursor:pointer;
+    text-decoration:underline; padding:4px 0;
+  }
+  .link-btn.flagged{color:var(--orange); font-weight:600;}
+  .qfooter .nav-buttons{display:flex; gap:10px;}
+  .step-btn{
+    background:var(--ink); color:var(--paper); border:none; border-radius:9px;
+    padding:11px 20px; font-size:14px; font-weight:600; cursor:pointer;
+  }
+  .step-btn.secondary{background:transparent; color:var(--ink); border:1.5px solid #c9c0a8;}
+  .step-btn:disabled{opacity:.35; cursor:not-allowed;}
+  .submit-btn{background:var(--red); color:#fff;}
+
+  /* ---------- results ---------- */
+  .res-hero{
+    background:linear-gradient(160deg,#161c25,#0e1318); border:1px solid var(--line);
+    border-radius:18px; padding:32px; margin-bottom:22px;
+  }
+  .res-score-row{display:flex; gap:26px; flex-wrap:wrap; align-items:center; margin-top:18px;}
+  .ring{position:relative; width:130px; height:130px; flex:none;}
+  .ring svg{transform:rotate(-90deg);}
+  .ring .ring-num{
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .ring .ring-num b{font-family:'Space Grotesk',sans-serif; font-size:26px;}
+  .ring .ring-num span{font-size:11px; color:#9aa3b0;}
+  .res-breakdown{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; flex:1; min-width:260px;}
+  .res-cat{background:var(--bg-soft); border:1px solid var(--line); border-radius:10px; padding:12px 14px;}
+  .res-cat .label{font-size:12px; color:#9aa3b0; display:flex; align-items:center; gap:6px; margin-bottom:4px;}
+  .res-cat .val{font-family:'IBM Plex Mono',monospace; font-size:18px;}
+  .res-bar{height:5px; border-radius:99px; background:#222a34; margin-top:6px; overflow:hidden;}
+  .res-bar i{display:block; height:100%; background:var(--accent);}
+
+  .review-controls{display:flex; gap:10px; margin:26px 0 14px; flex-wrap:wrap;}
+  .filter-chip{
+    background:var(--bg-soft); border:1px solid var(--line); color:#aab2bd; font-size:13px;
+    padding:7px 14px; border-radius:99px; cursor:pointer;
+  }
+  .filter-chip.active{background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600;}
+
+  .review-item{
+    background:var(--paper); color:var(--ink); border-radius:12px; padding:18px 20px; margin-bottom:12px;
+  }
+  .review-item .rmeta{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap;}
+  .rtag{font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; padding:3px 9px; border-radius:99px; color:#fff;}
+  .rstatus{font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:6px;}
+  .rstatus.correct{color:var(--green);}
+  .rstatus.wrong{color:var(--red);}
+  .rstatus.skipped{color:var(--ink-soft);}
+  .rq{font-size:15.5px; font-weight:500; margin-bottom:10px; line-height:1.55;}
+  .rishi{display:flex; justify-content:center; margin-bottom:10px;}
+  .rishi .ishihara-svg{width:140px;height:140px;}
+  .ranswers{display:flex; flex-direction:column; gap:6px; margin-bottom:10px;}
+  .ranswers .ra{font-size:13.5px; padding:8px 11px; border-radius:7px; background:var(--paper-2); display:flex; gap:8px;}
+  .ranswers .ra.is-correct{background:#e4f2e3; color:#2a6a2c;}
+  .ranswers .ra.is-wrong{background:#fae3e1; color:#8c2a23;}
+  .rexp{
+    font-size:13.5px; line-height:1.6; background:#fdf6ea; border-left:3px solid var(--accent);
+    padding:10px 13px; border-radius:0 8px 8px 0; color:#4a3c20;
+  }
+  .rexp.neutral{background:#eef1f6; border-left-color:var(--blue); color:#2e3c50;}
+
+  .disclaimer{
+    font-size:12.5px; color:#8a93a0; background:var(--bg-soft); border:1px dashed var(--line);
+    padding:12px 14px; border-radius:10px; margin:14px 0;
+  }
+
+  .end-actions{display:flex; gap:12px; margin-top:24px; flex-wrap:wrap;}
+
+  @media (max-width:560px){
+    .cover{padding:26px 20px;}
+    .qcard{padding:22px 18px 20px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ================= START SCREEN ================= -->
+  <section id="screen-start" class="screen active">
+    <div class="cover">
+      <span class="eyebrow">● Simulasi Ujian Seleksi Mahasiswa Baru</span>
+      <h1>Latihan TPA, TKDA, Tes IQ, Buta Warna &amp; Akademik Saintek</h1>
+      <p class="lead">50 soal dengan format mengikuti gaya tes seleksi 2025 (TPA/TKDA ala SNBT), lengkap dengan navigasi soal seperti ujian CBT sungguhan. Setiap jawaban yang salah akan dijelaskan alasannya di akhir sesi.</p>
+      <div class="nopeserta">
+        <span>No. Sesi <b class="mono" id="sesi-id">—</b></span>
+        <span>Total Soal <b>50</b></span>
+        <span>Estimasi Waktu <b>±45 Menit</b></span>
+      </div>
+
+      <div class="cat-grid" id="cat-grid"></div>
+
+      <div class="start-actions">
+        <button class="btn btn-primary" id="btn-start">Mulai Simulasi →</button>
+        <span class="small-note">Jawaban tersimpan otomatis selama sesi ini berlangsung di perangkatmu.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= QUIZ SCREEN ================= -->
+  <section id="screen-quiz" class="screen">
+    <div class="topbar">
+      <div class="timer mono">⏱ <span id="timer-display">00:00</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-label"><span id="answered-count">0</span>/50 terjawab</div>
+    </div>
+
+    <div class="quiz-shell">
+      <aside class="nav-panel">
+        <h4>Navigasi Soal</h4>
+        <div class="legend">
+          <span><i style="background:#1b222c;border:1px solid #2a323d;"></i>Belum dijawab</span>
+          <span><i style="background:var(--accent);"></i>Terjawab</span>
+          <span><i style="background:var(--orange);"></i>Ragu-ragu</span>
+        </div>
+        <div class="navgrid" id="navgrid"></div>
+        <button class="btn submit-btn step-btn" style="width:100%;margin-top:16px;" id="btn-finish">Selesai &amp; Lihat Hasil</button>
+      </aside>
+
+      <div class="qcard" id="qcard">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RESULT SCREEN ================= -->
+  <section id="screen-result" class="screen">
+    <div class="res-hero">
+      <span class="eyebrow">● Hasil Simulasi</span>
+      <h2 style="font-size:26px;">Rekap Hasil Ujianmu</h2>
+      <p class="small-note" style="max-width:580px;">Skor dihitung dari kategori yang memiliki kunci jawaban (TPA, TKDA, IQ, Buta Warna, Akademik). Tes Mimpi &amp; Motivasi bersifat reflektif dan tidak memengaruhi skor.</p>
+      <div class="res-score-row">
+        <div class="ring">
+          <svg width="130" height="130">
+            <circle cx="65" cy="65" r="56" stroke="#222a34" stroke-width="12" fill="none"/>
+            <circle id="ring-fg" cx="65" cy="65" r="56" stroke="#e0a458" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="352" stroke-dashoffset="352"/>
+          </svg>
+          <div class="ring-num"><b id="ring-score">0%</b><span id="ring-sub">0/45 benar</span></div>
+        </div>
+        <div class="res-breakdown" id="res-breakdown"></div>
+      </div>
+    </div>
+
+    <div class="disclaimer">Catatan: tes buta warna pada simulasi ini adalah versi sederhana berbasis pola titik digital untuk latihan, bukan alat diagnosis medis resmi. Untuk hasil yang akurat, konsultasikan dengan dokter mata / optometris.</div>
+
+    <h3 style="font-size:18px;margin-top:30px;">Pembahasan Tiap Soal</h3>
+    <div class="review-controls" id="review-filters"></div>
+    <div id="review-list"></div>
+
+    <div class="end-actions">
+      <button class="btn btn-primary" id="btn-restart">Ulangi Simulasi</button>
+      <button class="btn btn-ghost" id="btn-top">Kembali ke Atas</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   CATEGORY DEFINITIONS
+============================================================ */
+const CATS = [
+  {id:'tpa',  name:'TPA — Tes Potensi Akademik', short:'TPA', color:'#4f7cac',
+    desc:'Analogi, deret, dan penalaran logis ala SNBT.'},
+  {id:'tkda', name:'TKDA — Tes Kemampuan Dasar Akademik', short:'TKDA', color:'#6b5ca5',
+    desc:'Penalaran matematika & literasi Bahasa Indonesia/Inggris.'},
+  {id:'iq',   name:'Tes IQ', short:'IQ', color:'#3f9142',
+    desc:'Pola angka, analogi, dan logika cepat.'},
+  {id:'buta_warna', name:'Tes Buta Warna', short:'Buta Warna', color:'#c77f3b',
+    desc:'Simulasi plate angka tersembunyi gaya Ishihara.'},
+  {id:'mimpi', name:'Tes Mimpi & Motivasi', short:'Mimpi', color:'#b5538c',
+    desc:'Refleksi minat & kesiapan menghadapi kuliah — tidak dinilai benar/salah.'},
+  {id:'akademik', name:'Akademik Saintek', short:'Akademik', color:'#c1453d',
+    desc:'Biologi, Matematika, Fisika, Kimia, B. Indonesia, B. Inggris.'},
+];
+const CAT_MAP = Object.fromEntries(CATS.map(c=>[c.id,c]));
+
+/* ============================================================
+   5x7 DIGIT FONT (for Ishihara-style plate generator)
+============================================================ */
+const FONT = {
+  '0':["01110","10001","10001","10001","10001","10001","01110"],
+  '1':["00100","01100","00100","00100","00100","00100","01110"],
+  '2':["01110","10001","00001","00010","00100","01000","11111"],
+  '3':["11111","00010","00100","00010","00001","10001","01110"],
+  '4':["00010","00110","01010","10010","11111","00010","00010"],
+  '5':["11111","10000","11110","00001","00001","10001","01110"],
+  '6':["00110","01000","10000","11110","10001","10001","01110"],
+  '7':["11111","00001","00010","00100","01000","01000","01000"],
+  '8':["01110","10001","10001","01110","10001","10001","01110"],
+  '9':["01110","10001","10001","01111","00001","00010","01100"]
+};
+const ISHI_PALETTES = [
+  {fg:['#e8a33d','#f0b860','#d68f29'], bg:['#7fae6e','#5e9c4f','#94bd86']},
+  {fg:['#d9694b','#e8835f','#c8553a'], bg:['#6f9bbd','#5784a8','#86b0cf']},
+  {fg:['#e2b04a','#eec46c','#cf9a33'], bg:['#7a9e6e','#638a57','#94b687']},
+  {fg:['#c96b9c','#d987b1','#b65588'], bg:['#76a99a','#5d9384','#8fbcae']},
+  {fg:['#e0a458','#eab877','#cf9140'], bg:['#5b8f7c','#4a7a68','#76a692']},
+];
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function buildIshiharaSVG(digitsStr, paletteIdx){
+  const pal = ISHI_PALETTES[paletteIdx % ISHI_PALETTES.length];
+  const rows = 7;
+  const grid = [];
+  for(let r=0;r<rows;r++){
+    let rowStr = '';
+    for(let d=0; d<digitsStr.length; d++){
+      rowStr += FONT[digitsStr[d]][r];
+      if(d < digitsStr.length-1) rowStr += '0';
+    }
+    grid.push(rowStr);
+  }
+  const cols = grid[0].length;
+  const cell = 18;
+  const margin = 22;
+  const W = cols*cell + margin*2;
+  const H = rows*cell + margin*2;
+  const cx = W/2, cy = H/2;
+  const R = Math.min(W,H)/2 - 4;
+  const dotCount = Math.round(R*R*0.085);
+  let dots = '';
+  for(let i=0;i<dotCount;i++){
+    const ang = Math.random()*Math.PI*2;
+    const rad = R*Math.sqrt(Math.random());
+    const x = cx + rad*Math.cos(ang);
+    const y = cy + rad*Math.sin(ang);
+    const gx = Math.floor((x-margin)/cell);
+    const gy = Math.floor((y-margin)/cell);
+    let isFg = false;
+    if(gy>=0 && gy<rows && gx>=0 && gx<cols){
+      isFg = grid[gy][gx] === '1';
+    }
+    const color = isFg ? pick(pal.fg) : pick(pal.bg);
+    const r = 2.6 + Math.random()*3.6;
+    dots += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+color+'"/>';
+  }
+  return '<svg viewBox="0 0 '+W+' '+H+'" class="ishihara-svg" role="img" aria-label="Plate tes buta warna">'+
+         '<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="'+pal.bg[0]+'" opacity="0"/>'+dots+'</svg>';
+}
+
+/* ============================================================
+   QUESTION BANK (50 soal)
+============================================================ */
+const Q = [];
+
+// ---------- TPA (8) ----------
+Q.push({id:1, cat:'tpa', q:`GURU : MURID = DOKTER : ...`,
+  opts:[`Obat`,`Pasien`,`Rumah Sakit`,`Perawat`,`Resep`], ans:1,
+  exp:`Hubungan guru-murid adalah pemberi ilmu kepada penerima ilmu; dokter-pasien adalah pemberi layanan medis kepada penerima layanan. "Obat" dan "Resep" hanyalah alat bantu, bukan pihak penerima layanan.`});
+Q.push({id:2, cat:'tpa', q:`Lanjutkan deret berikut: 2, 5, 10, 17, 26, ...`,
+  opts:[`35`,`36`,`37`,`38`,`39`], ans:2,
+  exp:`Selisih antarsuku bertambah 2 setiap langkah (+3, +5, +7, +9, +11), sehingga suku berikutnya adalah 26 + 11 = 37.`});
+Q.push({id:3, cat:'tpa', q:`Lanjutkan deret huruf berikut: A, C, F, J, O, ...`,
+  opts:[`U`,`T`,`S`,`V`,`R`], ans:0,
+  exp:`Loncatan posisi huruf bertambah 1 setiap langkah (+2, +3, +4, +5, +6). Posisi O = 15, ditambah 6 menjadi 21 = "U".`});
+Q.push({id:4, cat:'tpa', q:`Semua mahasiswa yang rajin belajar lulus tepat waktu. Sebagian mahasiswa adalah mahasiswa yang rajin belajar. Kesimpulan yang tepat adalah...`,
+  opts:[`Semua mahasiswa lulus tepat waktu`,`Sebagian mahasiswa lulus tepat waktu`,`Tidak ada mahasiswa yang lulus tepat waktu`,`Semua yang lulus tepat waktu adalah mahasiswa rajin`,`Tidak dapat ditarik kesimpulan`], ans:1,
+  exp:`Premis hanya menjamin bahwa mahasiswa yang rajin belajar yang pasti lulus tepat waktu, dan hanya sebagian mahasiswa yang termasuk kategori itu. Maka kesimpulan validnya adalah "sebagian mahasiswa lulus tepat waktu".`});
+Q.push({id:5, cat:'tpa', q:`BUKU : PERPUSTAKAAN = OBAT : ...`,
+  opts:[`Dokter`,`Apotek`,`Resep`,`Pasien`,`Klinik`], ans:1,
+  exp:`Perpustakaan adalah tempat penyimpanan/peminjaman buku; apotek adalah tempat penyimpanan/penjualan obat — hubungannya adalah benda dengan tempat penyimpanannya.`});
+Q.push({id:6, cat:'tpa', q:`Jika hari ini hujan, maka jalan menjadi basah. Faktanya, hari ini jalan tidak basah. Maka...`,
+  opts:[`Hari ini hujan`,`Hari ini tidak hujan`,`Hari ini mungkin hujan`,`Tidak dapat disimpulkan`,`Hari ini akan hujan besok`], ans:1,
+  exp:`Ini adalah pola modus tollens: jika P→Q dan Q terbukti salah, maka P pasti salah. Karena jalan tidak basah (Q salah), maka dapat dipastikan hari ini tidak hujan (P salah).`});
+Q.push({id:7, cat:'tpa', q:`Lanjutkan deret berikut: 3, 6, 11, 18, 27, ...`,
+  opts:[`36`,`37`,`38`,`39`,`40`], ans:2,
+  exp:`Selisih antarsuku bertambah 2 setiap langkah (+3, +5, +7, +9, +11), sehingga suku berikutnya adalah 27 + 11 = 38.`});
+Q.push({id:8, cat:'tpa', q:`Dalam suatu sandi, kata AMAN ditulis sebagai DPDQ (setiap huruf digeser 3 posisi ke depan alfabet). Maka kata BUKU akan ditulis sebagai...`,
+  opts:[`EXNX`,`EXMX`,`FXNX`,`EWNX`,`EXNW`], ans:0,
+  exp:`Setiap huruf digeser 3 posisi ke depan: B→E, U→X, K→N, U→X. Sehingga kodenya adalah "EXNX".`});
+
+// ---------- TKDA (8) ----------
+Q.push({id:9, cat:'tkda', q:`Sebuah toko memberi diskon 20%, lalu diskon tambahan 10% dari harga setelah diskon pertama. Jika harga awal barang Rp200.000, harga akhirnya adalah...`,
+  opts:[`Rp140.000`,`Rp142.000`,`Rp144.000`,`Rp146.000`,`Rp150.000`], ans:2,
+  exp:`200.000 × 0,8 = 160.000 (setelah diskon 20%), lalu 160.000 × 0,9 = 144.000 (setelah diskon tambahan 10%).`});
+Q.push({id:10, cat:'tkda', q:`3 pekerja menyelesaikan suatu pekerjaan dalam 8 hari. Jika kecepatan kerja sama rata, berapa hari yang dibutuhkan 4 pekerja untuk menyelesaikan pekerjaan yang sama?`,
+  opts:[`5 hari`,`6 hari`,`7 hari`,`8 hari`,`9 hari`], ans:1,
+  exp:`Total "pekerja-hari" tetap = 3 × 8 = 24. Dengan 4 pekerja, waktu yang dibutuhkan = 24 ÷ 4 = 6 hari.`});
+Q.push({id:11, cat:'tkda', q:`Rata-rata nilai 5 siswa adalah 80. Setelah nilai siswa keenam ditambahkan, rata-rata menjadi 81. Nilai siswa keenam adalah...`,
+  opts:[`82`,`84`,`85`,`86`,`88`], ans:3,
+  exp:`Total nilai 5 siswa = 5 × 80 = 400. Total nilai 6 siswa = 6 × 81 = 486. Nilai siswa keenam = 486 − 400 = 86.`});
+Q.push({id:12, cat:'tkda', q:`Bacalah paragraf berikut.<br><br><em>"Penggundulan hutan di Indonesia telah meningkatkan risiko banjir dan tanah longsor di berbagai wilayah. Program reboisasi yang dilakukan pemerintah dan masyarakat bertujuan memulihkan fungsi hutan sebagai penyerap air sekaligus habitat satwa. Namun, keberhasilan reboisasi sangat bergantung pada partisipasi aktif warga sekitar hutan dalam menjaga kelestarian pohon yang telah ditanam."</em><br><br>Ide pokok paragraf tersebut adalah...`,
+  opts:[`Banjir terjadi karena curah hujan tinggi`,`Reboisasi hanya tanggung jawab pemerintah`,`Keberhasilan reboisasi membutuhkan partisipasi masyarakat, bukan hanya penanaman`,`Satwa liar punah akibat penggundulan hutan`,`Hutan Indonesia adalah yang terluas di dunia`], ans:2,
+  exp:`Kalimat terakhir paragraf menegaskan bahwa keberhasilan reboisasi "sangat bergantung pada partisipasi aktif warga", yang merupakan inti gagasan dari keseluruhan paragraf.`});
+Q.push({id:13, cat:'tkda', q:`Read the passage below.<br><br><em>"Renewable energy sources, such as solar and wind power, are becoming more affordable every year. Many countries are now investing heavily in these technologies to reduce their dependence on fossil fuels. However, the transition still faces challenges, including the need for better energy storage systems and updated power grid infrastructure."</em><br><br>What is the main idea of the passage?`,
+  opts:[`Fossil fuels are cheaper than renewable energy`,`Renewable energy adoption is growing but still faces infrastructure challenges`,`Solar power is the only renewable energy source`,`Countries have completely stopped using fossil fuels`,`Energy storage technology is already fully developed`], ans:1,
+  exp:`The passage states that adoption is increasing ("becoming more affordable", "investing heavily") while also noting remaining obstacles ("still faces challenges... storage... grid infrastructure"). Together, these form the main idea.`});
+Q.push({id:14, cat:'tkda', q:`Dalam suatu kode, posisi huruf pada alfabet digunakan sebagai angka (A=1, B=2, dst). Jika "MEJA" dikodekan sebagai 13-5-10-1, maka kode untuk "KURSI" adalah...`,
+  opts:[`11-21-18-19-9`,`11-20-18-19-9`,`12-21-18-19-9`,`11-21-17-19-9`,`11-21-18-18-9`], ans:0,
+  exp:`Setiap huruf dikonversi ke nomor urutnya di alfabet: K=11, U=21, R=18, S=19, I=9 → 11-21-18-19-9.`});
+Q.push({id:15, cat:'tkda', q:`Jika x + y = 12 dan x − y = 4, maka nilai x × y adalah...`,
+  opts:[`28`,`30`,`32`,`34`,`36`], ans:2,
+  exp:`Dari eliminasi/substitusi kedua persamaan diperoleh x = 8 dan y = 4, sehingga x × y = 8 × 4 = 32.`});
+Q.push({id:16, cat:'tkda', q:`Dalam suatu kelas berisi 30 siswa, 18 siswa suka Matematika, 15 siswa suka Fisika, dan 7 siswa suka keduanya. Berapa siswa yang tidak suka keduanya?`,
+  opts:[`2`,`3`,`4`,`5`,`6`], ans:2,
+  exp:`Siswa yang suka minimal satu pelajaran = 18 + 15 − 7 = 26 (prinsip inklusi-eksklusi). Siswa yang tidak suka keduanya = 30 − 26 = 4.`});
+
+// ---------- IQ (10) ----------
+Q.push({id:17, cat:'iq', q:`Lanjutkan deret berikut: 1, 1, 2, 3, 5, 8, 13, ...`,
+  opts:[`18`,`19`,`20`,`21`,`22`], ans:3,
+  exp:`Ini adalah deret Fibonacci, di mana setiap suku merupakan jumlah dua suku sebelumnya: 8 + 13 = 21.`});
+Q.push({id:18, cat:'iq', q:`Manakah yang tidak termasuk dalam kelompok yang sama?`,
+  opts:[`Apel`,`Jeruk`,`Wortel`,`Mangga`,`Pisang`], ans:2,
+  exp:`Apel, jeruk, mangga, dan pisang termasuk buah, sedangkan wortel adalah sayuran (umbi akar).`});
+Q.push({id:19, cat:'iq', q:`TANGAN : JARI = POHON : ...`,
+  opts:[`Akar`,`Daun`,`Ranting`,`Batang`,`Buah`], ans:2,
+  exp:`Jari adalah bagian yang bercabang dari tangan; ranting adalah bagian yang bercabang dari pohon — keduanya merupakan hubungan bagian-yang-bercabang.`});
+Q.push({id:20, cat:'iq', q:`Lanjutkan deret berikut: 2, 6, 12, 20, 30, ...`,
+  opts:[`36`,`40`,`42`,`44`,`46`], ans:2,
+  exp:`Selisih antarsuku adalah bilangan genap berurutan (+4, +6, +8, +10, +12), sehingga 30 + 12 = 42.`});
+Q.push({id:21, cat:'iq', q:`Semua kucing adalah hewan. Semua hewan butuh makan. Maka...`,
+  opts:[`Semua kucing butuh makan`,`Sebagian kucing tidak butuh makan`,`Semua yang butuh makan adalah kucing`,`Tidak ada hubungan logis`,`Hewan pasti kucing`], ans:0,
+  exp:`Karena semua kucing adalah hewan, dan semua hewan butuh makan, maka secara logis semua kucing pasti butuh makan (silogisme hipotetis).`});
+Q.push({id:22, cat:'iq', q:`Lanjutkan deret berikut: 5, 10, 9, 18, 17, 34, ...`,
+  opts:[`32`,`33`,`35`,`68`,`30`], ans:1,
+  exp:`Polanya bergantian: kali 2, lalu kurang 1 (×2, −1, ×2, −1, ...). Setelah 34 (hasil ×2), langkah berikutnya adalah −1, sehingga 34 − 1 = 33.`});
+Q.push({id:23, cat:'iq', q:`Manakah yang tidak termasuk dalam kelompok yang sama?`,
+  opts:[`Segitiga`,`Persegi`,`Lingkaran`,`Trapesium`,`Kubus`], ans:4,
+  exp:`Segitiga, persegi, lingkaran, dan trapesium adalah bangun datar (2 dimensi), sedangkan kubus adalah bangun ruang (3 dimensi).`});
+Q.push({id:24, cat:'iq', q:`4 : 16 = 5 : ...`,
+  opts:[`20`,`24`,`25`,`30`,`36`], ans:2,
+  exp:`Polanya adalah kuadrat dari bilangan pertama (4² = 16), sehingga jawabannya adalah 5² = 25.`});
+Q.push({id:25, cat:'iq', q:`Tono lebih tinggi dari Budi. Budi lebih tinggi dari Andi. Siapa yang paling pendek?`,
+  opts:[`Tono`,`Budi`,`Andi`,`Tidak dapat ditentukan`,`Sama tinggi`], ans:2,
+  exp:`Urutan tinggi badan: Tono > Budi > Andi, sehingga Andi adalah yang paling pendek.`});
+Q.push({id:26, cat:'iq', q:`Lanjutkan deret berikut: Z, Y, X, W, V, ...`,
+  opts:[`T`,`U`,`S`,`V`,`R`], ans:1,
+  exp:`Pola deret menurun satu huruf setiap langkah (mundur dari Z), sehingga setelah V adalah U.`});
+
+// ---------- BUTA WARNA (10) — simulasi gaya Ishihara ----------
+const PLATES = [
+  {digits:'12', opts:['12','21','17','42','Tidak terlihat angka apa pun'], ans:0},
+  {digits:'8',  opts:['3','8','6','9','Tidak terlihat angka apa pun'], ans:1},
+  {digits:'29', opts:['29','92','28','79','Tidak terlihat angka apa pun'], ans:0},
+  {digits:'5',  opts:['6','8','5','3','Tidak terlihat angka apa pun'], ans:2},
+  {digits:'3',  opts:['8','3','5','9','Tidak terlihat angka apa pun'], ans:1},
+  {digits:'15', opts:['15','51','16','45','Tidak terlihat angka apa pun'], ans:0},
+  {digits:'74', opts:['71','21','74','47','Tidak terlihat angka apa pun'], ans:2},
+  {digits:'6',  opts:['6','8','0','5','Tidak terlihat angka apa pun'], ans:0},
+  {digits:'45', opts:['43','15','48','45','Tidak terlihat angka apa pun'], ans:3},
+  {digits:'2',  opts:['2','7','1','4','Tidak terlihat angka apa pun'], ans:0},
+];
+PLATES.forEach((p,i)=>{
+  Q.push({id:27+i, cat:'buta_warna', q:`Angka apa yang kamu lihat pada plate berikut?`,
+    isIshihara:true, digits:p.digits, paletteIdx:i,
+    opts:p.opts, ans:p.ans,
+    exp:`Pola titik berwarna pada plate ini membentuk angka ${p.digits}.`});
+});
+
+// ---------- TES MIMPI & MOTIVASI (5, tidak dinilai benar/salah) ----------
+Q.push({id:37, cat:'mimpi', noScore:true,
+  q:`Ketika membayangkan kuliah nanti, hal yang paling membuatmu bersemangat adalah...`,
+  opts:[`Belajar hal baru yang menantang`,`Bertemu teman dan relasi baru`,`Membuktikan kemampuan diri`,`Mempersiapkan karier impian`,`Membanggakan orang tua`],
+  interp:[
+    `Kamu termotivasi oleh rasa ingin tahu intelektual — cocok dengan jurusan yang menuntut eksplorasi dan riset.`,
+    `Kamu termotivasi oleh aspek sosial — pertimbangkan lingkungan kampus dan organisasi saat memilih kampus.`,
+    `Kamu termotivasi oleh pencapaian pribadi — tetapkan target terukur agar progresmu terasa nyata.`,
+    `Kamu termotivasi oleh tujuan jangka panjang yang jelas — pastikan jurusan pilihanmu selaras dengan karier itu.`,
+    `Kamu termotivasi oleh dukungan keluarga — tetap dengarkan juga suara hatimu sendiri.`
+  ]});
+Q.push({id:38, cat:'mimpi', noScore:true,
+  q:`Jika gagal di percobaan pertama, reaksi pertamamu biasanya...`,
+  opts:[`Evaluasi & coba lagi dengan strategi baru`,`Cari second opinion / dukungan orang lain`,`Istirahat dulu baru bangkit`,`Mencari jurusan/jalan lain`,`Merasa down cukup lama sebelum bangkit`],
+  interp:[
+    `Kamu punya pola pikir berkembang (growth mindset) yang kuat — modal penting menghadapi seleksi yang kompetitif.`,
+    `Kamu menghargai kolaborasi — manfaatkan kelompok belajar atau bimbingan untuk persiapan ujianmu.`,
+    `Kamu butuh waktu memulihkan energi sebelum bangkit — jadwalkan istirahat di sela belajar agar tidak burnout.`,
+    `Kamu fleksibel mempertimbangkan opsi lain — itu wajar, tapi pastikan keputusan tetap berdasar minat, bukan rasa takut gagal.`,
+    `Wajar merasa berat saat gagal — coba bicarakan perasaanmu dengan orang terdekat agar tidak dipendam sendiri.`
+  ]});
+Q.push({id:39, cat:'mimpi', noScore:true,
+  q:`Jurusan impianmu lebih didorong oleh...`,
+  opts:[`Minat & passion pribadi`,`Prospek karier & gaji`,`Saran orang tua/keluarga`,`Mengikuti teman`,`Belum yakin, masih eksplorasi`],
+  interp:[
+    `Pilihan berbasis minat biasanya membuatmu lebih tahan banting menghadapi masa-masa sulit kuliah.`,
+    `Pertimbangan karier itu realistis — pastikan tetap ada kecocokan minat agar kamu betah menjalaninya.`,
+    `Pendapat keluarga berharga, namun pastikan kamu juga merasa nyaman menjalani jurusan tersebut.`,
+    `Tidak masalah terinspirasi teman, tapi cek kembali apakah jurusan itu benar-benar cocok dengan minatmu.`,
+    `Belum yakin itu wajar — manfaatkan waktu sebelum kuliah untuk eksplorasi lebih jauh lewat riset & konsultasi.`
+  ]});
+Q.push({id:40, cat:'mimpi', noScore:true,
+  q:`Bayangkan dirimu 5 tahun lagi setelah lulus kuliah, gambaran paling dekat adalah...`,
+  opts:[`Bekerja di bidang sesuai jurusan`,`Melanjutkan studi (S2)`,`Merintis usaha sendiri`,`Eksplorasi banyak bidang dulu`,`Belum terbayang jelas`],
+  interp:[
+    `Kamu punya gambaran karier yang jelas — ini bisa membantumu memilih jurusan dengan jalur karier yang sesuai.`,
+    `Orientasi akademikmu kuat — pertimbangkan jurusan dengan reputasi riset yang baik.`,
+    `Jiwa wirausahamu menonjol — cari kampus/jurusan yang mendukung pengembangan kewirausahaan mahasiswa.`,
+    `Kamu menyukai keberagaman pengalaman — jurusan interdisipliner mungkin cocok untukmu.`,
+    `Belum terbayang jelas itu normal di usiamu — fokus dulu memilih jurusan yang membuka banyak peluang.`
+  ]});
+Q.push({id:41, cat:'mimpi', noScore:true,
+  q:`Hal yang paling kamu khawatirkan menjelang ujian seleksi ini adalah...`,
+  opts:[`Tidak lolos jurusan pilihan`,`Persaingan yang ketat`,`Materi yang belum dikuasai`,`Tekanan dari keluarga`,`Tidak ada masalah berarti, cukup percaya diri`],
+  interp:[
+    `Wajar merasa khawatir soal hasil — fokuskan energi pada persiapan yang bisa kamu kendalikan.`,
+    `Persaingan memang nyata, tapi ingat: kamu hanya perlu bersaing dengan versi terbaik dirimu sendiri.`,
+    `Kenali bagian materi yang masih lemah, lalu buat rencana belajar khusus untuk itu.`,
+    `Coba komunikasikan perasaanmu pada keluarga — dukungan akan lebih terasa saat mereka memahami tekananmu.`,
+    `Rasa percaya diri itu modal bagus — tetap jaga konsistensi belajar agar performa optimal di hari-H.`
+  ]});
+
+// ---------- AKADEMIK SAINTEK (9) ----------
+Q.push({id:42, cat:'akademik', sub:'Biologi', q:`Organel sel yang berfungsi sebagai tempat respirasi sel dan penghasil energi (ATP) adalah...`,
+  opts:[`Ribosom`,`Mitokondria`,`Lisosom`,`Badan Golgi`,`Retikulum Endoplasma`], ans:1,
+  exp:`Mitokondria adalah organel yang berperan dalam respirasi seluler dan menghasilkan ATP sebagai sumber energi sel.`});
+Q.push({id:43, cat:'akademik', sub:'Biologi', q:`Proses pembelahan sel yang menghasilkan 4 sel anak dengan jumlah kromosom setengah dari sel induk disebut...`,
+  opts:[`Mitosis`,`Meiosis`,`Sitokinesis`,`Fragmentasi`,`Konjugasi`], ans:1,
+  exp:`Meiosis adalah pembelahan sel yang menghasilkan 4 sel anak bersifat haploid (kromosom separuh dari induk), berperan dalam pembentukan sel kelamin.`});
+Q.push({id:44, cat:'akademik', sub:'Biologi', q:`Hormon yang berperan menurunkan kadar gula darah dengan mendorong sel menyerap glukosa adalah...`,
+  opts:[`Glukagon`,`Insulin`,`Adrenalin`,`Tiroksin`,`Estrogen`], ans:1,
+  exp:`Insulin, yang dihasilkan sel beta pankreas, berfungsi menurunkan kadar gula darah dengan mendorong sel-sel tubuh menyerap glukosa.`});
+Q.push({id:45, cat:'akademik', sub:'Matematika', q:`Akar-akar dari persamaan x² − 5x + 6 = 0 adalah...`,
+  opts:[`1 dan 6`,`2 dan 3`,`−2 dan −3`,`2 dan −3`,`−2 dan 3`], ans:1,
+  exp:`Faktorkan: x² − 5x + 6 = (x − 2)(x − 3) = 0, sehingga akar-akarnya adalah x = 2 dan x = 3.`});
+Q.push({id:46, cat:'akademik', sub:'Matematika', q:`Nilai dari turunan f(x) = 3x² − 4x + 1 pada x = 2 adalah...`,
+  opts:[`6`,`7`,`8`,`9`,`10`], ans:2,
+  exp:`f'(x) = 6x − 4. Pada x = 2: f'(2) = 6(2) − 4 = 8.`});
+Q.push({id:47, cat:'akademik', sub:'Fisika', q:`Sebuah benda bermassa 2 kg bergerak dengan kecepatan 4 m/s. Besar energi kinetiknya adalah...`,
+  opts:[`8 J`,`12 J`,`16 J`,`20 J`,`32 J`], ans:2,
+  exp:`Ek = ½mv² = ½ × 2 × 4² = ½ × 2 × 16 = 16 joule.`});
+Q.push({id:48, cat:'akademik', sub:'Kimia', q:`Konfigurasi elektron dari unsur Natrium (nomor atom 11) adalah...`,
+  opts:[`2.8.1`,`2.8.2`,`2.7.2`,`2.8.8`,`1.8.2`], ans:0,
+  exp:`Natrium (Na, nomor atom 11) memiliki konfigurasi elektron 2.8.1 (kulit K=2, L=8, M=1).`});
+Q.push({id:49, cat:'akademik', sub:'Bahasa Indonesia', q:`Kalimat yang menggunakan kata baku dengan tepat adalah...`,
+  opts:[`Saya akan mengkonfirmasi jadwal besok`,`Saya akan mengonfirmasi jadwal besok`,`Saya akan mengkonfrimasi jadwal besok`,`Saya akan konfirmasi-kan jadwal besok`,`Saya akan mengkonfirmasikan jadwal besok`], ans:1,
+  exp:`Sesuai kaidah KBBI, awalan "meng-" pada kata dasar berhuruf awal "k" yang diikuti vokal akan melebur (k luluh), sehingga bentuk baku dari "konfirmasi" adalah "mengonfirmasi".`});
+Q.push({id:50, cat:'akademik', sub:'Bahasa Inggris', q:`Choose the grammatically correct sentence.`,
+  opts:[`She don't like spicy food`,`She doesn't likes spicy food`,`She doesn't like spicy food`,`She not like spicy food`,`She isn't like spicy food`], ans:2,
+  exp:`Subjek tunggal "she" dalam kalimat negatif menggunakan auxiliary "doesn't", dan kata kerja setelahnya harus berbentuk dasar tanpa akhiran -s. Bentuk yang benar adalah "She doesn't like spicy food."`});
+
+/* ============================================================
+   STATE
+============================================================ */
+const state = {
+  current: 0,
+  answers: {},   // qid -> option index
+  flags: {},     // qid -> bool
+  startTime: null,
+  timerInterval: null,
+};
+
+/* ============================================================
+   START SCREEN RENDER
+============================================================ */
+const catGrid = document.getElementById('cat-grid');
+CATS.forEach(c=>{
+  const count = Q.filter(q=>q.cat===c.id).length;
+  const div = document.createElement('div');
+  div.className = 'cat-card';
+  div.innerHTML = `<span class="n">${count} soal</span>
+    <h4><span class="dot" style="background:${c.color}"></span>${c.name}</h4>
+    <p>${c.desc}</p>`;
+  catGrid.appendChild(div);
+});
+document.getElementById('sesi-id').textContent = '2026-' + Math.floor(100000+Math.random()*899999);
+
+/* ============================================================
+   NAV GRID
+============================================================ */
+const navgrid = document.getElementById('navgrid');
+function renderNavGrid(){
+  navgrid.innerHTML = '';
+  Q.forEach((q,idx)=>{
+    const b = document.createElement('button');
+    b.textContent = idx+1;
+    b.title = CAT_MAP[q.cat].short;
+    if(state.answers[q.id] !== undefined) b.classList.add('answered');
+    if(state.flags[q.id]) b.classList.add('flag');
+    if(idx === state.current) b.classList.add('current');
+    b.addEventListener('click', ()=>{ state.current = idx; renderQuestion(); });
+    navgrid.appendChild(b);
+  });
+}
+
+/* ============================================================
+   QUESTION RENDER
+============================================================ */
+const qcard = document.getElementById('qcard');
+
+function renderQuestion(){
+  const q = Q[state.current];
+  const cat = CAT_MAP[q.cat];
+  const selected = state.answers[q.id];
+
+  let mediaHtml = '';
+  if(q.isIshihara){
+    mediaHtml = `<div class="ishi-box">${buildIshiharaSVG(q.digits, q.paletteIdx)}</div>`;
+  }
+
+  let subHtml = '';
+  if(q.cat === 'mimpi'){
+    subHtml = `<div class="qsub">Tidak ada jawaban benar atau salah — pilih yang paling menggambarkan dirimu. Hasilnya akan muncul sebagai refleksi singkat di akhir sesi.</div>`;
+  } else if(q.sub){
+    subHtml = `<div class="qsub">Mata pelajaran: <strong>${q.sub}</strong></div>`;
+  }
+
+  const optsHtml = q.opts.map((opt,i)=>{
+    const letter = String.fromCharCode(65+i);
+    const sel = selected === i ? 'selected' : '';
+    return `<button class="opt ${sel}" data-idx="${i}">
+      <span class="bubble">${letter}</span><span>${opt}</span>
+    </button>`;
+  }).join('');
+
+  const flagged = !!state.flags[q.id];
+
+  qcard.innerHTML = `
+    <div class="qmeta">
+      <span class="badge" style="background:${cat.color}">${cat.short}</span>
+      <span class="qnum mono">Soal ${state.current+1} / ${Q.length}</span>
+    </div>
+    <div class="qtext">${q.q}</div>
+    ${subHtml}
+    ${mediaHtml}
+    <div class="options">${optsHtml}</div>
+    <div class="qfooter">
+      <div class="left-actions">
+        <button class="link-btn ${flagged?'flagged':''}" id="btn-flag">${flagged ? '★ Ditandai ragu-ragu' : '☆ Tandai ragu-ragu'}</button>
+      </div>
+      <div class="nav-buttons">
+        <button class="step-btn secondary" id="btn-prev" ${state.current===0?'disabled':''}>← Sebelumnya</button>
+        <button class="step-btn" id="btn-next" ${state.current===Q.length-1?'disabled':''}>Selanjutnya →</button>
+      </div>
+    </div>
+  `;
+
+  qcard.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.answers[q.id] = parseInt(btn.dataset.idx,10);
+      renderQuestion();
+      renderNavGrid();
+      updateProgress();
+    });
+  });
+  document.getElementById('btn-flag').addEventListener('click', ()=>{
+    state.flags[q.id] = !state.flags[q.id];
+    renderQuestion();
+    renderNavGrid();
+  });
+  const prevBtn = document.getElementById('btn-prev');
+  const nextBtn = document.getElementById('btn-next');
+  if(prevBtn) prevBtn.addEventListener('click', ()=>{ if(state.current>0){ state.current--; renderQuestion(); renderNavGrid(); }});
+  if(nextBtn) nextBtn.addEventListener('click', ()=>{ if(state.current<Q.length-1){ state.current++; renderQuestion(); renderNavGrid(); }});
+
+  renderNavGrid();
+}
+
+function updateProgress(){
+  const answered = Object.keys(state.answers).length;
+  document.getElementById('answered-count').textContent = answered;
+  document.getElementById('progress-fill').style.width = (answered/Q.length*100)+'%';
+}
+
+/* ============================================================
+   TIMER
+============================================================ */
+function startTimer(){
+  state.startTime = Date.now();
+  state.timerInterval = setInterval(()=>{
+    const sec = Math.floor((Date.now()-state.startTime)/1000);
+    const mm = String(Math.floor(sec/60)).padStart(2,'0');
+    const ss = String(sec%60).padStart(2,'0');
+    document.getElementById('timer-display').textContent = mm+':'+ss;
+  }, 1000);
+}
+function stopTimer(){ if(state.timerInterval) clearInterval(state.timerInterval); }
+
+/* ============================================================
+   SCREEN SWITCHING
+============================================================ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('btn-start').addEventListener('click', ()=>{
+  showScreen('screen-quiz');
+  state.current = 0;
+  renderQuestion();
+  updateProgress();
+  startTimer();
+});
+
+document.getElementById('btn-finish').addEventListener('click', ()=>{
+  const answered = Object.keys(state.answers).length;
+  if(answered < Q.length){
+    const ok = confirm('Baru '+answered+' dari '+Q.length+' soal yang kamu jawab. Yakin ingin menyelesaikan sesi sekarang?');
+    if(!ok) return;
+  }
+  stopTimer();
+  showResults();
+});
+
+/* keyboard shortcuts on quiz screen */
+document.addEventListener('keydown', (e)=>{
+  if(!document.getElementById('screen-quiz').classList.contains('active')) return;
+  const q = Q[state.current];
+  if(['1','2','3','4','5'].includes(e.key)){
+    const idx = parseInt(e.key,10)-1;
+    if(idx < q.opts.length){
+      state.answers[q.id] = idx;
+      renderQuestion(); renderNavGrid(); updateProgress();
+    }
+  } else if(e.key === 'ArrowRight' && state.current < Q.length-1){
+    state.current++; renderQuestion(); renderNavGrid();
+  } else if(e.key === 'ArrowLeft' && state.current > 0){
+    state.current--; renderQuestion(); renderNavGrid();
+  }
+});
+
+/* ============================================================
+   RESULTS
+============================================================ */
+function showResults(){
+  showScreen('screen-result');
+
+  const scorable = Q.filter(q=>!q.noScore);
+  let correctCount = 0;
+  const catStats = {};
+  CATS.forEach(c=>catStats[c.id] = {total:0, correct:0});
+
+  Q.forEach(q=>{
+    if(q.noScore) return;
+    catStats[q.cat].total++;
+    if(state.answers[q.id] === q.ans){
+      correctCount++;
+      catStats[q.cat].correct++;
+    }
+  });
+
+  const pct = Math.round(correctCount/scorable.length*100);
+  document.getElementById('ring-score').textContent = pct+'%';
+  document.getElementById('ring-sub').textContent = correctCount+'/'+scorable.length+' benar';
+  const circumference = 2*Math.PI*56;
+  const offset = circumference - (pct/100)*circumference;
+  document.getElementById('ring-fg').setAttribute('stroke-dasharray', circumference.toFixed(1));
+  document.getElementById('ring-fg').setAttribute('stroke-dashoffset', offset.toFixed(1));
+
+  const bd = document.getElementById('res-breakdown');
+  bd.innerHTML = '';
+  CATS.forEach(c=>{
+    const s = catStats[c.id];
+    if(s.total === 0){
+      bd.innerHTML += `<div class="res-cat">
+        <div class="label"><span class="dot" style="background:${c.color};width:8px;height:8px;border-radius:50%;display:inline-block;"></span>${c.short}</div>
+        <div class="val">Refleksi</div>
+      </div>`;
+      return;
+    }
+    const p = Math.round(s.correct/s.total*100);
+    bd.innerHTML += `<div class="res-cat">
+      <div class="label"><span class="dot" style="background:${c.color};width:8px;height:8px;border-radius:50%;display:inline-block;"></span>${c.short}</div>
+      <div class="val mono">${s.correct}/${s.total}</div>
+      <div class="res-bar"><i style="width:${p}%;background:${c.color}"></i></div>
+    </div>`;
+  });
+
+  renderReviewFilters();
+  renderReviewList('all');
+}
+
+function renderReviewFilters(){
+  const wrap = document.getElementById('review-filters');
+  const filters = [{id:'all', label:'Semua Soal'}, {id:'wrong', label:'Hanya yang Salah'}, {id:'correct', label:'Hanya yang Benar'}]
+    .concat(CATS.map(c=>({id:c.id, label:c.short})));
+  wrap.innerHTML = filters.map((f,i)=>`<button class="filter-chip ${i===0?'active':''}" data-filter="${f.id}">${f.label}</button>`).join('');
+  wrap.querySelectorAll('.filter-chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      wrap.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderReviewList(btn.dataset.filter);
+    });
+  });
+}
+
+function renderReviewList(filter){
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  Q.forEach((q,idx)=>{
+    const cat = CAT_MAP[q.cat];
+    const selected = state.answers[q.id];
+    const isAnswered = selected !== undefined;
+    const isCorrect = !q.noScore && isAnswered && selected === q.ans;
+    const isWrong = !q.noScore && isAnswered && selected !== q.ans;
+
+    if(filter === 'wrong' && !isWrong) return;
+    if(filter === 'correct' && !isCorrect) return;
+    if(!['all','wrong','correct'].includes(filter) && q.cat !== filter) return;
+
+    let statusHtml = '';
+    if(q.noScore){
+      statusHtml = `<span class="rstatus skipped">◆ Reflektif</span>`;
+    } else if(!isAnswered){
+      statusHtml = `<span class="rstatus skipped">— Tidak dijawab</span>`;
+    } else if(isCorrect){
+      statusHtml = `<span class="rstatus correct">✔ Benar</span>`;
+    } else {
+      statusHtml = `<span class="rstatus wrong">✘ Salah</span>`;
+    }
+
+    let mediaHtml = '';
+    if(q.isIshihara){
+      mediaHtml = `<div class="rishi">${buildIshiharaSVG(q.digits, q.paletteIdx)}</div>`;
+    }
+
+    let answersHtml = '';
+    if(q.noScore){
+      answersHtml = `<div class="ranswers">
+        <div class="ra">Jawabanmu: <strong>${isAnswered ? q.opts[selected] : '(tidak dijawab)'}</strong></div>
+      </div>`;
+    } else {
+      answersHtml = '<div class="ranswers">';
+      q.opts.forEach((opt,i)=>{
+        let cls = '';
+        if(i === q.ans) cls = 'is-correct';
+        else if(i === selected) cls = 'is-wrong';
+        if(i === q.ans || i === selected){
+          answersHtml += `<div class="ra ${cls}">${i===q.ans?'✔':'✘'} ${String.fromCharCode(65+i)}. ${opt}</div>`;
+        }
+      });
+      if(!isAnswered){
+        answersHtml += `<div class="ra">Kunci jawaban: <strong>${String.fromCharCode(65+q.ans)}. ${q.opts[q.ans]}</strong></div>`;
+      }
+      answersHtml += '</div>';
+    }
+
+    let expHtml = '';
+    if(q.noScore){
+      const txt = isAnswered ? q.interp[selected] : 'Soal ini tidak dijawab, jadi belum ada refleksi yang bisa ditampilkan.';
+      expHtml = `<div class="rexp neutral">💭 ${txt}</div>`;
+    } else {
+      expHtml = `<div class="rexp">${isWrong || !isAnswered ? '❌ Kenapa jawabanmu kurang tepat: ' : '✅ Pembahasan: '}${q.exp}</div>`;
+    }
+
+    const item = document.createElement('div');
+    item.className = 'review-item';
+    item.innerHTML = `
+      <div class="rmeta">
+        <span class="rtag" style="background:${cat.color}">${cat.short} · No. ${idx+1}</span>
+        ${statusHtml}
+      </div>
+      <div class="rq">${q.q}</div>
+      ${mediaHtml}
+      ${answersHtml}
+      ${expHtml}
+    `;
+    list.appendChild(item);
+  });
+
+  if(list.children.length === 0){
+    list.innerHTML = '<p class="small-note">Tidak ada soal pada filter ini.</p>';
+  }
+}
+
+document.getElementById('btn-restart').addEventListener('click', ()=>{
+  state.current = 0;
+  state.answers = {};
+  state.flags = {};
+  stopTimer();
+  document.getElementById('timer-display').textContent = '00:00';
+  showScreen('screen-start');
+});
+document.getElementById('btn-top').addEventListener('click', ()=>{
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+})();
+</script>
+</body>
+</html>
