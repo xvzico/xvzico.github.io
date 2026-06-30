@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi Tes Seleksi Calon Mahasiswa Baru — FK UMI</title>
+<style>
+  :root{
+    --ink:#0F2A24;
+    --teal:#0F4C45;
+    --teal-deep:#0A332E;
+    --cream:#F7F4EC;
+    --paper:#FFFEFB;
+    --coral:#D9543B;
+    --gold:#B68B3C;
+    --line:#E2DCC9;
+    --good:#1F7A4D;
+    --bad:#C13B2E;
+    --shadow: 0 12px 30px -14px rgba(15,42,36,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+    min-height:100vh;
+    background-image:
+      radial-gradient(circle at 10% 0%, rgba(15,76,69,0.06), transparent 40%),
+      radial-gradient(circle at 90% 100%, rgba(182,139,60,0.08), transparent 45%);
+  }
+  .display{
+    font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+    letter-spacing:-0.01em;
+  }
+  .ui-font{
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:28px 18px 80px;
+  }
+
+  /* ---------- TOP BAR / ECG SIGNATURE ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(180deg, var(--cream) 78%, rgba(247,244,236,0));
+    padding-top:6px; padding-bottom:14px;
+  }
+  .brand-row{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:10px;
+  }
+  .brand{
+    font-size:13px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--teal); font-weight:600; font-family: -apple-system, sans-serif;
+  }
+  .brand b{color:var(--coral);}
+  .qcount{
+    font-family: -apple-system, sans-serif; font-size:13px; color:#6b6453;
+  }
+  .ecg-track{
+    position:relative; height:34px; width:100%;
+    border-bottom:1px solid var(--line);
+  }
+  .ecg-bg, .ecg-fg{
+    position:absolute; top:0; left:0; width:100%; height:100%;
+  }
+  .ecg-fg{ overflow:hidden; width:0%; transition:width .45s cubic-bezier(.4,0,.2,1); }
+  .ecg-fg svg, .ecg-bg svg{ width:760px; max-width:none; height:34px; display:block; }
+
+  /* ---------- CARDS ---------- */
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:30px 26px;
+  }
+  .hidden{display:none !important;}
+
+  /* ---------- INTRO ---------- */
+  .intro-eyebrow{
+    font-family:-apple-system, sans-serif; font-size:12px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:10px;
+  }
+  h1.title{
+    font-size:30px; line-height:1.2; margin:0 0 12px; color:var(--teal-deep);
+  }
+  .lede{
+    font-size:16px; line-height:1.65; color:#3c3a31; margin:0 0 22px;
+  }
+  .scope-grid{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:24px;
+  }
+  .scope-item{
+    border:1px solid var(--line); border-radius:10px; padding:12px 14px;
+    font-family:-apple-system, sans-serif; font-size:13px; color:var(--teal-deep);
+    background:#FBFAF5;
+  }
+  .scope-item b{display:block; font-size:15px; color:var(--teal); margin-bottom:2px; font-family:inherit;}
+  label.namefield{
+    display:block; font-family:-apple-system, sans-serif; font-size:13px;
+    color:#55503f; margin-bottom:6px; font-weight:600;
+  }
+  input#peserta{
+    width:100%; padding:13px 14px; border-radius:9px; border:1.5px solid var(--line);
+    font-family:-apple-system, sans-serif; font-size:15px; margin-bottom:22px;
+    background:#fff; color:var(--ink);
+  }
+  input#peserta:focus{outline:2px solid var(--teal); outline-offset:1px; border-color:var(--teal);}
+  .btn{
+    appearance:none; border:none; cursor:pointer;
+    font-family:-apple-system, sans-serif; font-weight:700; font-size:15px;
+    padding:14px 26px; border-radius:9px;
+    background:var(--teal); color:#fff;
+    box-shadow:0 8px 18px -8px rgba(15,76,69,.55);
+    transition:transform .15s ease, background .15s ease;
+  }
+  .btn:hover{background:var(--teal-deep); transform:translateY(-1px);}
+  .btn:active{transform:translateY(0);}
+  .btn.secondary{background:transparent; color:var(--teal); border:1.5px solid var(--teal); box-shadow:none;}
+  .btn.secondary:hover{background:rgba(15,76,69,.06);}
+  .btn:focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+  .btn-row{display:flex; gap:12px; flex-wrap:wrap;}
+
+  /* ---------- QUESTION ---------- */
+  .cat-badge{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:-apple-system, sans-serif; font-size:11.5px; letter-spacing:.1em;
+    text-transform:uppercase; font-weight:700; color:var(--coral);
+    border:1px solid rgba(217,84,59,.35); background:rgba(217,84,59,.06);
+    padding:5px 11px; border-radius:99px; margin-bottom:16px;
+  }
+  .qnum{
+    font-family:-apple-system, sans-serif; font-size:13px; color:#8a8470; margin-bottom:6px;
+  }
+  .qtext{
+    font-size:20px; line-height:1.5; color:var(--ink); margin:0 0 20px;
+  }
+  .ishihara-box{
+    display:flex; justify-content:center; margin:18px 0 22px;
+  }
+  canvas.ishihara{
+    border-radius:50%; box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);
+  }
+  .options{ display:flex; flex-direction:column; gap:10px; margin-bottom:8px;}
+  .option{
+    display:flex; align-items:center; gap:13px;
+    border:1.5px solid var(--line); border-radius:10px;
+    padding:13px 15px; cursor:pointer;
+    font-family:-apple-system, sans-serif; font-size:15px; color:var(--ink);
+    background:#fff; transition:border-color .15s, background .15s;
+  }
+  .option:hover{border-color:var(--teal);}
+  .option.selected{border-color:var(--teal); background:rgba(15,76,69,.06);}
+  .option .letter{
+    flex:0 0 26px; height:26px; border-radius:50%;
+    border:1.5px solid var(--line); display:flex; align-items:center; justify-content:center;
+    font-size:12.5px; font-weight:700; color:#6b6453;
+  }
+  .option.selected .letter{ background:var(--teal); border-color:var(--teal); color:#fff;}
+  .nav-row{
+    display:flex; justify-content:space-between; align-items:center; margin-top:26px;
+    flex-wrap:wrap; gap:10px;
+  }
+  .hint{font-family:-apple-system, sans-serif; font-size:12.5px; color:#a39d88;}
+
+  /* ---------- RESULT ---------- */
+  .result-hero{
+    display:flex; gap:24px; align-items:center; margin-bottom:26px; flex-wrap:wrap;
+  }
+  .score-ring{
+    position:relative; flex:0 0 132px; width:132px; height:132px;
+  }
+  .score-ring svg{ transform:rotate(-90deg); }
+  .score-num{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+  }
+  .score-num .n{ font-size:30px; font-weight:700; color:var(--teal-deep); font-family: -apple-system, sans-serif;}
+  .score-num .d{ font-size:11px; color:#8a8470; font-family:-apple-system, sans-serif; }
+  .result-text h2{ margin:0 0 6px; font-size:22px; color:var(--teal-deep);}
+  .result-text p{ margin:0; font-family:-apple-system, sans-serif; font-size:14px; color:#5a5747; line-height:1.55;}
+
+  .breakdown{
+    display:grid; grid-template-columns:1fr; gap:8px; margin-bottom:28px;
+  }
+  .bd-row{
+    display:flex; align-items:center; gap:12px;
+    font-family:-apple-system, sans-serif; font-size:13px;
+  }
+  .bd-label{ flex:0 0 200px; color:#3c3a31;}
+  .bd-bar-track{ flex:1; height:8px; background:#EFEADA; border-radius:99px; overflow:hidden;}
+  .bd-bar-fill{ height:100%; background:var(--teal); border-radius:99px;}
+  .bd-frac{ flex:0 0 44px; text-align:right; color:#6b6453;}
+
+  .review-item{
+    border:1px solid var(--line); border-radius:12px; padding:18px 18px 16px;
+    margin-bottom:14px; background:#fff;
+  }
+  .review-item.correct{ border-left:4px solid var(--good);}
+  .review-item.wrong{ border-left:4px solid var(--bad);}
+  .review-head{
+    display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
+    margin-bottom:8px;
+  }
+  .review-cat{
+    font-family:-apple-system, sans-serif; font-size:11px; text-transform:uppercase;
+    letter-spacing:.08em; color:#8a8470; font-weight:700;
+  }
+  .review-status{
+    font-family:-apple-system, sans-serif; font-size:12.5px; font-weight:700;
+    padding:3px 10px; border-radius:99px; white-space:nowrap;
+  }
+  .review-status.ok{ color:var(--good); background:rgba(31,122,77,.1);}
+  .review-status.bad{ color:var(--bad); background:rgba(193,59,46,.1);}
+  .review-q{ font-size:16px; margin:0 0 10px; color:var(--ink); line-height:1.5;}
+  .review-ans{ font-family:-apple-system, sans-serif; font-size:13.5px; margin:0 0 4px; color:#3c3a31;}
+  .review-ans b{color:var(--teal-deep);}
+  .review-explain{
+    margin-top:10px; padding:12px 14px; border-radius:9px;
+    background:#FBF6EC; border:1px solid rgba(182,139,60,.3);
+    font-family:-apple-system, sans-serif; font-size:13.5px; color:#5a5026; line-height:1.6;
+  }
+  .review-explain b{ color:var(--gold); }
+
+  footer.note{
+    text-align:center; font-family:-apple-system, sans-serif; font-size:12px;
+    color:#a39d88; margin-top:30px; line-height:1.6;
+  }
+
+  @media (max-width:520px){
+    .wrap{padding:16px 12px 60px;}
+    .card{padding:22px 18px;}
+    h1.title{font-size:25px;}
+    .scope-grid{grid-template-columns:1fr;}
+    .qtext{font-size:18px;}
+    .bd-label{flex-basis:130px; font-size:12px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand-row">
+      <div class="brand">Simulasi Seleksi <b>FK&nbsp;UMI</b></div>
+      <div class="qcount ui-font" id="topCounter">Belum dimulai</div>
+    </div>
+    <div class="ecg-track">
+      <div class="ecg-bg">
+        <svg viewBox="0 0 760 34" preserveAspectRatio="none">
+          <polyline fill="none" stroke="#E2DCC9" stroke-width="2"
+            points="0,17 60,17 75,17 85,4 95,30 105,17 140,17 200,17 215,17 225,4 235,30 245,17 280,17 340,17 355,17 365,4 375,30 385,17 420,17 480,17 495,17 505,4 515,30 525,17 560,17 620,17 635,17 645,4 655,30 665,17 700,17 760,17"/>
+        </svg>
+      </div>
+      <div class="ecg-fg" id="ecgFg">
+        <svg viewBox="0 0 760 34" preserveAspectRatio="none">
+          <polyline fill="none" stroke="#D9543B" stroke-width="2.4"
+            points="0,17 60,17 75,17 85,4 95,30 105,17 140,17 200,17 215,17 225,4 235,30 245,17 280,17 340,17 355,17 365,4 375,30 385,17 420,17 480,17 495,17 505,4 515,30 525,17 560,17 620,17 635,17 645,4 655,30 665,17 700,17 760,17"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= INTRO ================= -->
+  <section id="intro" class="card">
+    <div class="intro-eyebrow">Try-out Mandiri — Bukan Tes Resmi</div>
+    <h1 class="title display">Simulasi TPA, TKDA, Tes IQ, Buta Warna &amp; Persepsi</h1>
+    <p class="lede">Latihan ini menggabungkan 25 soal yang menyerupai komponen tes seleksi calon mahasiswa baru Fakultas Kedokteran, mulai dari penalaran logis hingga materi akademik rumpun IPA. Kerjakan satu per satu — di akhir, setiap jawaban yang keliru akan dijelaskan alasannya.</p>
+
+    <div class="scope-grid ui-font">
+      <div class="scope-item"><b>TPA &amp; TKDA</b>Verbal, numerik, logika</div>
+      <div class="scope-item"><b>Tes IQ</b>Pola, deret, peluang</div>
+      <div class="scope-item"><b>Akademik IPA</b>Biologi, Matematika</div>
+      <div class="scope-item"><b>Bahasa</b>Inggris &amp; Indonesia</div>
+      <div class="scope-item" style="grid-column:1/-1;"><b>Persepsi Warna</b>Simulasi pola titik (mirip Ishihara) — bukan pengganti pemeriksaan medis resmi</div>
+    </div>
+
+    <label class="namefield" for="peserta">Nama peserta (opsional)</label>
+    <input id="peserta" type="text" placeholder="Tulis nama Anda...">
+
+    <button class="btn" id="startBtn">Mulai Simulasi · 25 Soal</button>
+  </section>
+
+  <!-- ================= QUESTION ================= -->
+  <section id="quiz" class="card hidden">
+    <div class="cat-badge" id="catBadge">Kategori</div>
+    <div class="qnum ui-font" id="qNumLabel">Soal 1 dari 25</div>
+    <p class="qtext display" id="qText">Pertanyaan</p>
+    <div class="ishihara-box hidden" id="ishiharaBox"></div>
+    <div class="options" id="optionsBox"></div>
+    <div class="nav-row">
+      <span class="hint" id="navHint">Pilih salah satu jawaban untuk melanjutkan</span>
+      <div class="btn-row">
+        <button class="btn secondary" id="prevBtn">Sebelumnya</button>
+        <button class="btn" id="nextBtn" disabled>Lanjut</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RESULT ================= -->
+  <section id="result" class="card hidden">
+    <div class="intro-eyebrow">Hasil Simulasi</div>
+    <div class="result-hero">
+      <div class="score-ring">
+        <svg width="132" height="132" viewBox="0 0 132 132">
+          <circle cx="66" cy="66" r="58" fill="none" stroke="#EFEADA" stroke-width="12"/>
+          <circle id="scoreCircle" cx="66" cy="66" r="58" fill="none" stroke="#0F4C45" stroke-width="12"
+            stroke-linecap="round" stroke-dasharray="364" stroke-dashoffset="364"/>
+        </svg>
+        <div class="score-num">
+          <span class="n" id="scoreN">0</span>
+          <span class="d">dari 25 benar</span>
+        </div>
+      </div>
+      <div class="result-text">
+        <h2 id="resultName" class="display">Hasil Anda</h2>
+        <p id="resultMsg">Ringkasan performa akan tampil di sini.</p>
+      </div>
+    </div>
+
+    <div class="breakdown ui-font" id="breakdown"></div>
+
+    <h2 class="display" style="font-size:19px; color:var(--teal-deep); margin-bottom:14px;">Pembahasan Tiap Soal</h2>
+    <div id="reviewList"></div>
+
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn secondary" id="retryBtn">Ulangi Simulasi</button>
+    </div>
+  </section>
+
+  <footer class="note">
+    Materi ini disusun sebagai latihan mandiri dan tidak berafiliasi resmi dengan panitia seleksi.<br>
+    Simulasi buta warna bersifat ilustratif — pemeriksaan resmi tetap menggunakan buku Ishihara asli oleh tenaga medis.
+  </footer>
+</div>
+
+<script>
+/* =================================================================
+   DATA SOAL
+   ================================================================= */
+const QUESTIONS = [
+  // ---------- TKDA VERBAL ----------
+  {
+    category: "TKDA · Verbal",
+    text: "DOKTER : PASIEN = ... : MURID",
+    options: ["Sekolah", "Guru", "Buku", "Kelas"],
+    correct: 1,
+    explanation: "Hubungan analoginya adalah pelaku profesi terhadap pihak yang ditanganinya. Dokter menangani pasien, sebagaimana Guru menangani/mendidik murid. 'Sekolah', 'Buku', dan 'Kelas' adalah tempat/alat, bukan pelaku yang setara dengan Dokter."
+  },
+  {
+    category: "TKDA · Verbal",
+    text: "Sinonim yang paling tepat untuk kata 'konsisten' adalah...",
+    options: ["Berubah-ubah", "Tetap / ajeg", "Ragu-ragu", "Acak"],
+    correct: 1,
+    explanation: "Konsisten berarti taat asas, tetap, dan tidak berubah-ubah dalam sikap atau tindakan. Pilihan lain justru berlawanan makna (antonim) dengan konsisten."
+  },
+  {
+    category: "TKDA · Verbal",
+    text: "Premis 1: Semua dokter adalah lulusan pendidikan kedokteran. Premis 2: Sebagian lulusan pendidikan kedokteran bekerja di rumah sakit. Kesimpulan yang paling logis adalah...",
+    options: [
+      "Semua dokter pasti bekerja di rumah sakit",
+      "Sebagian dokter mungkin bekerja di rumah sakit",
+      "Semua lulusan pendidikan kedokteran adalah dokter",
+      "Tidak ada dokter yang bekerja di rumah sakit"
+    ],
+    correct: 1,
+    explanation: "Karena semua dokter termasuk dalam kelompok lulusan kedokteran, dan sebagian dari kelompok itu bekerja di rumah sakit, maka yang bisa dipastikan secara logis hanyalah kemungkinan: sebagian dokter mungkin bekerja di rumah sakit. Kita tidak punya dasar untuk menyimpulkan 'semua' atau 'tidak ada'."
+  },
+
+  // ---------- TKDA NUMERIK ----------
+  {
+    category: "TKDA · Numerik",
+    text: "Lanjutkan deret berikut: 2, 6, 12, 20, 30, ...",
+    options: ["36", "40", "42", "44"],
+    correct: 2,
+    explanation: "Selisih antar suku bertambah genap: +4, +6, +8, +10, +12. Maka suku berikutnya adalah 30 + 12 = 42."
+  },
+  {
+    category: "TKDA · Numerik",
+    text: "Setelah mengalami kenaikan harga sebesar 20%, sebuah buku kedokteran dijual seharga Rp60.000. Berapa harga buku tersebut sebelum naik?",
+    options: ["Rp48.000", "Rp50.000", "Rp52.000", "Rp55.000"],
+    correct: 1,
+    explanation: "Harga akhir = harga awal × 1,2. Maka harga awal = 60.000 ÷ 1,2 = Rp50.000. Kesalahan umum adalah menghitung 20% langsung dari 60.000 (mengurangi 12.000), padahal kenaikan 20% dihitung dari harga awal, bukan harga akhir."
+  },
+  {
+    category: "TKDA · Numerik",
+    text: "Mobil A menempuh 150 km dalam 3 jam. Mobil B menempuh 240 km dalam 4 jam. Mana yang lebih cepat, dan berapa selisih kecepatannya?",
+    options: [
+      "Mobil A lebih cepat, selisih 10 km/jam",
+      "Mobil B lebih cepat, selisih 10 km/jam",
+      "Kecepatan keduanya sama",
+      "Mobil B lebih cepat, selisih 15 km/jam"
+    ],
+    correct: 1,
+    explanation: "Kecepatan Mobil A = 150 ÷ 3 = 50 km/jam. Kecepatan Mobil B = 240 ÷ 4 = 60 km/jam. Mobil B lebih cepat dengan selisih 60 − 50 = 10 km/jam."
+  },
+
+  // ---------- IQ ----------
+  {
+    category: "Tes IQ · Pola",
+    text: "Lanjutkan pola huruf: A, C, F, J, O, ...",
+    options: ["T", "U", "V", "S"],
+    correct: 1,
+    explanation: "Selisih posisi huruf mengikuti bilangan segitiga: +2, +3, +4, +5, lalu +6. A(1) C(3) F(6) J(10) O(15), suku berikutnya posisi 21 = huruf U."
+  },
+  {
+    category: "Tes IQ · Pola",
+    text: "Lanjutkan deret Fibonacci berikut: 1, 1, 2, 3, 5, 8, 13, ...",
+    options: ["18", "20", "21", "24"],
+    correct: 2,
+    explanation: "Pada deret Fibonacci, setiap suku adalah jumlah dua suku sebelumnya: 8 + 13 = 21. Jawaban 18, 20, dan 24 tidak mengikuti aturan penjumlahan tersebut."
+  },
+  {
+    category: "Tes IQ · Logika",
+    text: "Hari ini Rabu. 'Lusa' dihitung 2 hari setelah hari ini. Tiga hari setelah lusa jatuh pada hari apa?",
+    options: ["Minggu", "Senin", "Selasa", "Sabtu"],
+    correct: 1,
+    explanation: "Lusa dari hari Rabu adalah Jumat (Rabu + 2 hari). Tiga hari setelah Jumat adalah Senin (Jumat + 3 hari = Sabtu, Minggu, Senin)."
+  },
+  {
+    category: "Tes IQ · Peluang",
+    text: "Sebuah kotak berisi 2 bola merah dan 3 bola biru. Jika diambil 2 bola sekaligus secara acak, berapa peluang keduanya berwarna biru?",
+    options: ["1/5", "3/10", "2/5", "1/2"],
+    correct: 1,
+    explanation: "Total cara mengambil 2 dari 5 bola = C(5,2) = 10. Cara mengambil 2 bola biru dari 3 bola biru = C(3,2) = 3. Maka peluangnya = 3/10."
+  },
+
+  // ---------- BIOLOGI ----------
+  {
+    category: "Akademik · Biologi",
+    text: "Organel sel yang berfungsi sebagai pusat respirasi seluler penghasil energi (ATP) adalah...",
+    options: ["Ribosom", "Mitokondria", "Lisosom", "Badan Golgi"],
+    correct: 1,
+    explanation: "Mitokondria sering disebut 'pembangkit energi sel' karena di sinilah respirasi seluler berlangsung untuk menghasilkan ATP. Ribosom berperan dalam sintesis protein, Lisosom dalam pencernaan intraseluler, dan Badan Golgi dalam pengemasan/distribusi protein."
+  },
+  {
+    category: "Akademik · Biologi",
+    text: "Hormon yang dihasilkan pankreas untuk menurunkan kadar gula darah adalah...",
+    options: ["Glukagon", "Insulin", "Adrenalin", "Tiroksin"],
+    correct: 1,
+    explanation: "Insulin diproduksi sel beta pankreas dan berfungsi menurunkan kadar gula darah dengan mendorong sel menyerap glukosa. Glukagon justru bekerja sebaliknya, menaikkan kadar gula darah."
+  },
+  {
+    category: "Akademik · Biologi",
+    text: "Proses fotosintesis pada tumbuhan berlangsung di dalam organel...",
+    options: ["Mitokondria", "Kloroplas", "Nukleus", "Vakuola"],
+    correct: 1,
+    explanation: "Kloroplas mengandung klorofil yang menangkap energi cahaya untuk fotosintesis. Mitokondria justru berperan dalam respirasi seluler, bukan fotosintesis."
+  },
+  {
+    category: "Akademik · Biologi",
+    text: "Golongan darah AB disebut 'resipien universal' karena...",
+    options: [
+      "Memiliki aglutinogen A dan B sehingga bisa menerima semua golongan darah",
+      "Tidak memiliki aglutinin a dan b dalam plasma darahnya",
+      "Memiliki aglutinin a dan b dalam plasma darahnya",
+      "Tidak memiliki aglutinogen sama sekali"
+    ],
+    correct: 1,
+    explanation: "Golongan darah AB tidak memiliki antibodi (aglutinin) a maupun b dalam plasmanya, sehingga tidak akan menyerang sel darah merah dari golongan manapun saat menerima transfusi. Itulah sebabnya disebut resipien universal — bukan karena aglutinogennya, melainkan karena tidak adanya aglutinin."
+  },
+
+  // ---------- MATEMATIKA ----------
+  {
+    category: "Akademik · Matematika",
+    text: "Akar-akar dari persamaan kuadrat x² − 5x + 6 = 0 adalah...",
+    options: ["1 dan 6", "2 dan 3", "−2 dan −3", "2 dan −3"],
+    correct: 1,
+    explanation: "Faktorkan: x² − 5x + 6 = (x − 2)(x − 3) = 0, sehingga x = 2 atau x = 3. Pastikan tanda faktor sesuai: hasil kali kedua akar harus 6 dan jumlahnya harus 5."
+  },
+  {
+    category: "Akademik · Matematika",
+    text: "Nilai dari log 100 + log 10 = ...",
+    options: ["2", "3", "10", "1000"],
+    correct: 1,
+    explanation: "log 100 = log 10² = 2, dan log 10 = 1 (basis 10). Maka 2 + 1 = 3. Sifat logaritma log(a) + log(b) = log(a×b) juga bisa dipakai: log(100×10) = log 1000 = 3."
+  },
+  {
+    category: "Akademik · Matematika",
+    text: "Sebuah segitiga siku-siku memiliki dua sisi siku-siku sepanjang 6 cm dan 8 cm. Panjang sisi miringnya adalah...",
+    options: ["9 cm", "10 cm", "12 cm", "14 cm"],
+    correct: 1,
+    explanation: "Gunakan teorema Pythagoras: c = √(6² + 8²) = √(36 + 64) = √100 = 10 cm."
+  },
+  {
+    category: "Akademik · Matematika",
+    text: "Turunan pertama dari f(x) = 3x² + 2x − 5 adalah...",
+    options: ["6x + 2", "3x + 2", "6x − 5", "x² + 2x"],
+    correct: 0,
+    explanation: "Gunakan aturan pangkat: turunan dari 3x² adalah 6x, turunan dari 2x adalah 2, dan turunan konstanta (−5) adalah 0. Jadi f'(x) = 6x + 2."
+  },
+
+  // ---------- BAHASA INGGRIS ----------
+  {
+    category: "Akademik · Bahasa Inggris",
+    text: "Choose the grammatically correct sentence.",
+    options: [
+      "She don't like coffee.",
+      "She doesn't likes coffee.",
+      "She doesn't like coffee.",
+      "She not like coffee."
+    ],
+    correct: 2,
+    explanation: "For third-person singular subjects (she/he/it), the negative form uses 'doesn't' followed by the base verb (without -s). So the correct form is 'She doesn't like coffee.'"
+  },
+  {
+    category: "Akademik · Bahasa Inggris",
+    text: "The word 'diligent' is closest in meaning to...",
+    options: ["Lazy", "Hardworking", "Careless", "Slow"],
+    correct: 1,
+    explanation: "'Diligent' describes someone who works carefully and persistently, which is synonymous with 'hardworking'. 'Lazy' and 'careless' are nearly opposite in meaning."
+  },
+  {
+    category: "Akademik · Bahasa Inggris",
+    text: "Complete the sentence (passive voice): 'The patient ___ examined by the doctor before the surgery.'",
+    options: ["was", "is", "has", "were"],
+    correct: 0,
+    explanation: "The subject 'the patient' is singular and the context ('before the surgery') signals a past, completed action, so the correct passive form is 'was examined'."
+  },
+
+  // ---------- BAHASA INDONESIA ----------
+  {
+    category: "Akademik · Bahasa Indonesia",
+    text: "Kalimat berikut yang menggunakan ejaan baku sesuai PUEBI adalah...",
+    options: [
+      "Praktek dokter itu ramai pasien.",
+      "Praktik dokter itu ramai pasien.",
+      "Praktek dokter itu ramai fasien.",
+      "Praktik doktor itu ramai pasien."
+    ],
+    correct: 1,
+    explanation: "Bentuk baku dari kata serapan tersebut adalah 'praktik' (bukan 'praktek'), 'dokter' (bukan 'doktor'), dan 'pasien' (bukan 'fasien'). Hanya pilihan B yang seluruh kosakatanya baku."
+  },
+  {
+    category: "Akademik · Bahasa Indonesia",
+    text: "Dalam konteks hubungan dokter-pasien, makna kata 'empati' yang paling tepat adalah...",
+    options: [
+      "Rasa kasihan tanpa memahami kondisi pasien",
+      "Kemampuan memahami dan ikut merasakan apa yang dirasakan orang lain",
+      "Sikap acuh terhadap kondisi pasien",
+      "Tindakan medis tanpa komunikasi dengan pasien"
+    ],
+    correct: 1,
+    explanation: "Empati berbeda dengan simpati (rasa kasihan). Empati adalah kemampuan menempatkan diri pada posisi orang lain serta memahami dan merasakan apa yang dirasakannya — kemampuan penting bagi calon dokter dalam membangun komunikasi dengan pasien."
+  },
+
+  // ---------- BUTA WARNA (CANVAS) ----------
+  {
+    category: "Tes Persepsi Warna",
+    text: "Perhatikan pola titik berikut. Angka apa yang tampak di tengah lingkaran?",
+    canvas: { id: "ishihara8", number: "8",
+      fg: ["#E2543B","#D9543B","#C9472F","#EA6A4F"],
+      bg: ["#8FB23E","#7FA235","#9CC04A","#6F9430","#A8C95C"] },
+    options: ["3", "6", "8", "9"],
+    correct: 2,
+    explanation: "Pola titik tersebut membentuk angka 8 melalui kontras antara titik berwarna kemerahan (angka) dan titik berwarna kehijauan (latar). Pada orang dengan gangguan persepsi merah-hijau (deuteranopia/protanopia), kedua warna ini bisa tampak hampir serupa sehingga angka sulit terlihat."
+  },
+  {
+    category: "Tes Persepsi Warna",
+    text: "Perhatikan pola titik berikut. Angka apa yang tampak di tengah lingkaran?",
+    canvas: { id: "ishihara5", number: "5",
+      fg: ["#FF9800","#FB8C00","#F57C00","#FFA726"],
+      bg: ["#7FA235","#8FB23E","#6F9430","#9CC04A","#A8C95C"] },
+    options: ["2", "5", "6", "8"],
+    correct: 1,
+    explanation: "Pola titik tersebut membentuk angka 5 melalui kontras antara titik berwarna oranye (angka) dan titik berwarna hijau (latar). Tes ini hanya simulasi sederhana berbasis layar; hasilnya tidak menggantikan pemeriksaan buta warna resmi dengan buku Ishihara cetak oleh tenaga medis."
+  }
+];
+
+/* =================================================================
+   STATE
+   ================================================================= */
+let current = 0;
+const answers = new Array(QUESTIONS.length).fill(null);
+
+const introEl = document.getElementById('intro');
+const quizEl = document.getElementById('quiz');
+const resultEl = document.getElementById('result');
+const topCounter = document.getElementById('topCounter');
+const ecgFg = document.getElementById('ecgFg');
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  introEl.classList.add('hidden');
+  quizEl.classList.remove('hidden');
+  renderQuestion(0);
+});
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+  if (current > 0) { current--; renderQuestion(current); }
+});
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if (current < QUESTIONS.length - 1) {
+    current++;
+    renderQuestion(current);
+  } else {
+    showResult();
+  }
+});
+
+document.getElementById('retryBtn').addEventListener('click', () => {
+  current = 0;
+  answers.fill(null);
+  resultEl.classList.add('hidden');
+  introEl.classList.remove('hidden');
+  topCounter.textContent = 'Belum dimulai';
+  ecgFg.style.width = '0%';
+});
+
+/* =================================================================
+   RENDER QUESTION
+   ================================================================= */
+function renderQuestion(idx){
+  const q = QUESTIONS[idx];
+  document.getElementById('catBadge').textContent = q.category;
+  document.getElementById('qNumLabel').textContent = `Soal ${idx+1} dari ${QUESTIONS.length}`;
+  document.getElementById('qText').textContent = q.text;
+  topCounter.textContent = `Soal ${idx+1} / ${QUESTIONS.length}`;
+  ecgFg.style.width = ((idx) / QUESTIONS.length * 100) + '%';
+
+  const ishiharaBox = document.getElementById('ishiharaBox');
+  ishiharaBox.innerHTML = '';
+  if (q.canvas){
+    ishiharaBox.classList.remove('hidden');
+    const cv = document.createElement('canvas');
+    cv.className = 'ishihara';
+    cv.width = 220; cv.height = 220;
+    ishiharaBox.appendChild(cv);
+    drawIshihara(cv, q.canvas.number, q.canvas.fg, q.canvas.bg);
+  } else {
+    ishiharaBox.classList.add('hidden');
+  }
+
+  const optionsBox = document.getElementById('optionsBox');
+  optionsBox.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.options.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option' + (answers[idx] === i ? ' selected' : '');
+    div.innerHTML = `<span class="letter">${letters[i]}</span><span>${opt}</span>`;
+    div.addEventListener('click', () => {
+      answers[idx] = i;
+      renderQuestion(idx);
+    });
+    optionsBox.appendChild(div);
+  });
+
+  document.getElementById('prevBtn').style.visibility = idx === 0 ? 'hidden' : 'visible';
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.disabled = answers[idx] === null;
+  nextBtn.textContent = idx === QUESTIONS.length - 1 ? 'Lihat Hasil' : 'Lanjut';
+  document.getElementById('navHint').textContent = answers[idx] === null
+    ? 'Pilih salah satu jawaban untuk melanjutkan'
+    : 'Jawaban tersimpan — klik Lanjut';
+}
+
+/* =================================================================
+   ISHIHARA-STYLE CANVAS GENERATOR
+   ================================================================= */
+function drawIshihara(canvas, number, fgPalette, bgPalette){
+  const ctx = canvas.getContext('2d');
+  const size = canvas.width;
+
+  const mask = document.createElement('canvas');
+  mask.width = size; mask.height = size;
+  const mctx = mask.getContext('2d');
+  mctx.fillStyle = '#000';
+  mctx.fillRect(0,0,size,size);
+  mctx.fillStyle = '#fff';
+  mctx.font = `bold ${Math.floor(size*0.62)}px Arial`;
+  mctx.textAlign = 'center';
+  mctx.textBaseline = 'middle';
+  mctx.fillText(String(number), size/2, size/2 + size*0.04);
+  const maskData = mctx.getImageData(0,0,size,size).data;
+
+  // base circular backdrop
+  ctx.clearRect(0,0,size,size);
+  ctx.beginPath();
+  ctx.arc(size/2, size/2, size/2, 0, Math.PI*2);
+  ctx.fillStyle = '#FDF9EE';
+  ctx.fill();
+
+  const radius = size/2;
+  const cx = size/2, cy = size/2;
+  const dots = 1800;
+  for (let i=0;i<dots;i++){
+    const angle = Math.random()*Math.PI*2;
+    const dist = Math.sqrt(Math.random())*(radius-6);
+    const x = cx + Math.cos(angle)*dist;
+    const y = cy + Math.sin(angle)*dist;
+    const r = 2.2 + Math.random()*3.4;
+
+    const px = Math.min(size-1, Math.max(0, Math.floor(x)));
+    const py = Math.min(size-1, Math.max(0, Math.floor(y)));
+    const idx = (py*size+px)*4;
+    const isFg = maskData[idx] > 128;
+    const palette = isFg ? fgPalette : bgPalette;
+    const color = palette[Math.floor(Math.random()*palette.length)];
+
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+}
+
+/* =================================================================
+   RESULT
+   ================================================================= */
+function showResult(){
+  quizEl.classList.add('hidden');
+  resultEl.classList.remove('hidden');
+  ecgFg.style.width = '100%';
+  topCounter.textContent = 'Selesai';
+
+  let correctCount = 0;
+  QUESTIONS.forEach((q, i) => { if (answers[i] === q.correct) correctCount++; });
+
+  const name = document.getElementById('peserta').value.trim();
+  document.getElementById('resultName').textContent = name ? `Hasil — ${name}` : 'Hasil Simulasi Anda';
+
+  const pct = correctCount / QUESTIONS.length;
+  document.getElementById('scoreN').textContent = correctCount;
+  const circle = document.getElementById('scoreCircle');
+  const circumference = 364;
+  circle.style.strokeDashoffset = circumference - (circumference * pct);
+  circle.style.stroke = pct >= 0.7 ? '#1F7A4D' : (pct >= 0.4 ? '#B68B3C' : '#C13B2E');
+
+  let msg;
+  if (pct >= 0.8) msg = "Sangat baik. Penguasaan materi penalaran dan akademik Anda kuat — pertahankan konsistensi ini menjelang ujian sesungguhnya.";
+  else if (pct >= 0.6) msg = "Cukup baik. Sebagian besar konsep sudah dikuasai, namun masih ada celah pada beberapa kategori — cek pembahasan di bawah.";
+  else if (pct >= 0.4) msg = "Perlu latihan lebih lanjut. Fokuskan waktu belajar pada kategori dengan skor terendah di bawah ini.";
+  else msg = "Hasil ini menunjukkan dasar yang perlu diperkuat kembali. Gunakan pembahasan di bawah sebagai titik awal belajar.";
+  document.getElementById('resultMsg').textContent = msg;
+
+  // breakdown per category
+  const cats = {};
+  QUESTIONS.forEach((q,i) => {
+    if (!cats[q.category]) cats[q.category] = {correct:0, total:0};
+    cats[q.category].total++;
+    if (answers[i] === q.correct) cats[q.category].correct++;
+  });
+  const breakdownEl = document.getElementById('breakdown');
+  breakdownEl.innerHTML = '';
+  Object.keys(cats).forEach(cat => {
+    const c = cats[cat];
+    const row = document.createElement('div');
+    row.className = 'bd-row';
+    row.innerHTML = `
+      <span class="bd-label">${cat}</span>
+      <span class="bd-bar-track"><span class="bd-bar-fill" style="width:${(c.correct/c.total*100)}%;"></span></span>
+      <span class="bd-frac">${c.correct}/${c.total}</span>
+    `;
+    breakdownEl.appendChild(row);
+  });
+
+  // review list
+  const reviewList = document.getElementById('reviewList');
+  reviewList.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  QUESTIONS.forEach((q, i) => {
+    const isCorrect = answers[i] === q.correct;
+    const item = document.createElement('div');
+    item.className = 'review-item ' + (isCorrect ? 'correct' : 'wrong');
+    const userAns = answers[i] === null ? '(tidak dijawab)' : `${letters[answers[i]]}. ${q.options[answers[i]]}`;
+    const correctAns = `${letters[q.correct]}. ${q.options[q.correct]}`;
+    item.innerHTML = `
+      <div class="review-head">
+        <span class="review-cat">${q.category} · Soal ${i+1}</span>
+        <span class="review-status ${isCorrect ? 'ok' : 'bad'}">${isCorrect ? 'Benar' : 'Salah'}</span>
+      </div>
+      <p class="review-q display">${q.text}</p>
+      <p class="review-ans">Jawaban Anda: <b>${userAns}</b></p>
+      ${!isCorrect ? `<p class="review-ans">Jawaban benar: <b>${correctAns}</b></p>` : ''}
+      <div class="review-explain"><b>Pembahasan:</b> ${q.explanation}</div>
+    `;
+    reviewList.appendChild(item);
+  });
+}
+</script>
+</body>
+</html>
