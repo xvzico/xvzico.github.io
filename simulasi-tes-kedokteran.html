@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi Tes Masuk Kedokteran — TPA/TKDA, Buta Warna, IQ &amp; Kepribadian</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F2E9;
+    --paper-dim:#EAE5D6;
+    --ink:#1B2A4A;
+    --ink-soft:#3B4A6B;
+    --teal:#0F766E;
+    --teal-dark:#0B5A54;
+    --coral:#C4502B;
+    --sage:#3F7A54;
+    --graphite:#5B6472;
+    --line:#D8D2BF;
+    --card:#FFFEFA;
+    --shadow: 0 1px 0 rgba(27,42,74,0.06), 0 8px 24px -12px rgba(27,42,74,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 100% -10%, rgba(15,118,110,0.07), transparent),
+      var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:inherit;}
+  button{font-family:inherit;}
+
+  /* ===== Layout shell ===== */
+  #topbar{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 28px;
+    background:rgba(245,242,233,0.88);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  #topbar .brand{display:flex; align-items:center; gap:10px;}
+  #topbar .brand .mark{
+    width:30px;height:30px;border-radius:7px;
+    background:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--paper); font-family:'Fraunces',serif; font-weight:700; font-size:15px;
+  }
+  #topbar .brand .name{font-family:'Fraunces',serif; font-weight:600; font-size:16px;}
+  #topbar .brand .sub{font-size:11px; color:var(--graphite); letter-spacing:0.04em; text-transform:uppercase;}
+  #topbar .status{font-size:12px; color:var(--graphite);}
+  #topbar .home-link{
+    font-size:13px; color:var(--teal-dark); text-decoration:none; font-weight:500;
+    display:none;
+    border:1px solid var(--line); padding:7px 12px; border-radius:8px; background:var(--card);
+    cursor:pointer;
+  }
+  #topbar .home-link.show{display:inline-block;}
+
+  #app{max-width:960px; margin:0 auto; padding:36px 20px 90px;}
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--teal-dark); font-weight:600;
+  }
+
+  /* ===== Home ===== */
+  .hero{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:40px 36px;
+    box-shadow:var(--shadow);
+    position:relative;
+    overflow:hidden;
+    margin-bottom:28px;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; right:-60px; top:-60px; width:220px; height:220px; border-radius:50%;
+    background:radial-gradient(circle, rgba(15,118,110,0.14), transparent 70%);
+  }
+  .hero h1{font-size:32px; line-height:1.15; max-width:560px;}
+  .hero p.lead{color:var(--ink-soft); max-width:560px; margin-top:12px; font-size:15px; line-height:1.6;}
+  .badge-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:18px;}
+  .badge{
+    font-size:11.5px; font-family:'IBM Plex Mono',monospace; padding:5px 10px; border-radius:100px;
+    background:var(--paper-dim); border:1px solid var(--line); color:var(--ink-soft);
+  }
+
+  .grid-cards{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:640px){.grid-cards{grid-template-columns:1fr;}}
+
+  .test-card{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:22px; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    display:flex; flex-direction:column; gap:10px; text-align:left;
+  }
+  .test-card:hover{transform:translateY(-3px); box-shadow:var(--shadow); border-color:var(--teal);}
+  .test-card:focus-visible{outline:3px solid var(--teal); outline-offset:2px;}
+  .test-card .num{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--teal-dark);
+    display:flex; align-items:center; gap:8px;
+  }
+  .test-card .num .dot{width:6px;height:6px;border-radius:50%; background:var(--teal);}
+  .test-card h3{font-size:19px;}
+  .test-card p{color:var(--graphite); font-size:13.5px; line-height:1.55; margin:0;}
+  .test-card .meta{
+    margin-top:auto; padding-top:10px; border-top:1px dashed var(--line);
+    display:flex; justify-content:space-between; font-size:12px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;
+  }
+
+  .notice{
+    font-size:12.5px; color:var(--graphite); background:var(--paper-dim); border:1px solid var(--line);
+    border-radius:10px; padding:12px 14px; margin-top:22px; line-height:1.6;
+  }
+  .notice b{color:var(--ink);}
+
+  /* ===== Test runner ===== */
+  .progress-wrap{margin-bottom:22px;}
+  .progress-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
+  .progress-top .label{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft);}
+  .progress-top .count{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--teal-dark); font-weight:600;}
+  .progress-bar{height:6px; border-radius:100px; background:var(--paper-dim); overflow:hidden; border:1px solid var(--line);}
+  .progress-fill{height:100%; background:linear-gradient(90deg, var(--teal), var(--teal-dark)); border-radius:100px; transition:width .3s ease;}
+
+  .qcard{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:30px; box-shadow:var(--shadow);
+  }
+  .qcard .qtag{
+    display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:11px;
+    color:var(--teal-dark); background:rgba(15,118,110,0.08); border:1px solid rgba(15,118,110,0.25);
+    padding:4px 10px; border-radius:100px; margin-bottom:14px;
+  }
+  .qcard .qtext{font-size:18px; line-height:1.55; font-weight:500; color:var(--ink);}
+  .qcard .qtext.serif{font-family:'Fraunces',serif; font-weight:500;}
+  .qimg-wrap{display:flex; justify-content:center; margin:20px 0;}
+
+  .options{display:flex; flex-direction:column; gap:10px; margin-top:22px;}
+  .opt{
+    display:flex; align-items:center; gap:14px;
+    border:1.5px solid var(--line); border-radius:12px; padding:13px 16px;
+    background:var(--paper); cursor:pointer; text-align:left; font-size:14.5px; color:var(--ink);
+    transition:border-color .12s ease, background .12s ease;
+  }
+  .opt:hover{border-color:var(--teal);}
+  .opt .bubble{
+    flex:none; width:26px; height:26px; border-radius:50%; border:2px solid var(--graphite);
+    display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace;
+    font-size:12px; font-weight:600; color:var(--graphite);
+  }
+  .opt.selected{border-color:var(--ink); background:#FBF9F1;}
+  .opt.selected .bubble{background:var(--ink); border-color:var(--ink); color:var(--paper);}
+  .opt.grid-thumb{padding:10px;}
+
+  .opt-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:22px;}
+  @media(max-width:560px){.opt-grid{grid-template-columns:repeat(2,1fr);}}
+  .opt-thumb{
+    border:1.5px solid var(--line); border-radius:12px; padding:8px; cursor:pointer; background:var(--paper);
+    display:flex; align-items:center; justify-content:center; transition:border-color .12s ease;
+  }
+  .opt-thumb:hover{border-color:var(--teal);}
+  .opt-thumb.selected{border-color:var(--ink); background:#FBF9F1; box-shadow:0 0 0 3px rgba(27,42,74,0.08) inset;}
+
+  .nav-row{display:flex; justify-content:space-between; align-items:center; margin-top:26px;}
+  .btn{
+    font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; border-radius:10px;
+    padding:11px 20px; border:1.5px solid var(--ink); background:var(--ink); color:var(--paper);
+    cursor:pointer; transition:opacity .12s ease, transform .12s ease;
+  }
+  .btn:hover{opacity:0.88;}
+  .btn:active{transform:scale(0.98);}
+  .btn.ghost{background:transparent; color:var(--ink); border-color:var(--line);}
+  .btn.ghost:hover{border-color:var(--ink);}
+  .btn:disabled{opacity:0.4; cursor:not-allowed;}
+  .btn.small{padding:8px 14px; font-size:12.5px;}
+
+  .jump-grid{display:flex; flex-wrap:wrap; gap:6px; margin-top:18px;}
+  .jump-dot{
+    width:30px;height:30px; border-radius:8px; border:1px solid var(--line); background:var(--paper);
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--graphite); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .jump-dot.answered{background:var(--paper-dim); border-color:var(--teal); color:var(--teal-dark);}
+  .jump-dot.current{outline:2px solid var(--ink); outline-offset:1px;}
+
+  /* ===== Results ===== */
+  .report{
+    background:var(--card); border:1px solid var(--line); border-radius:16px; padding:32px; box-shadow:var(--shadow);
+  }
+  .report-head{display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap;
+    border-bottom:1px dashed var(--line); padding-bottom:22px; margin-bottom:22px;}
+  .score-badge{
+    width:104px; height:104px; border-radius:50%; border:3px solid var(--ink); flex:none;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; background:var(--paper);
+  }
+  .score-badge .num{font-size:30px; font-weight:700; line-height:1;}
+  .score-badge .of{font-size:11px; color:var(--graphite); font-family:'IBM Plex Mono',monospace;}
+  .report-head h2{font-size:22px;}
+  .report-head .sub{color:var(--graphite); font-size:13.5px; margin-top:6px; max-width:420px;}
+
+  .scale-row{margin-bottom:14px;}
+  .scale-row .top{display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;}
+  .scale-row .top .lvl{font-family:'IBM Plex Mono',monospace; font-size:11px; padding:2px 8px; border-radius:100px; border:1px solid var(--line);}
+  .scale-bar{height:8px; background:var(--paper-dim); border-radius:100px; overflow:hidden; border:1px solid var(--line);}
+  .scale-bar .fill{height:100%; background:var(--teal);}
+
+  .review-item{border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:12px;}
+  .review-item.wrong{border-color:rgba(196,80,43,0.4); background:rgba(196,80,43,0.04);}
+  .review-item.correct{border-color:rgba(63,122,84,0.35); background:rgba(63,122,84,0.04);}
+  .review-item .rtag{font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600;}
+  .review-item.wrong .rtag{color:var(--coral);}
+  .review-item.correct .rtag{color:var(--sage);}
+  .review-item .rq{font-size:14.5px; margin:8px 0; font-weight:500;}
+  .review-item .ranswer{font-size:13px; color:var(--ink-soft); margin:3px 0;}
+  .review-item .rexp{font-size:13px; color:var(--graphite); margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); line-height:1.55;}
+
+  .filter-row{display:flex; gap:8px; margin:20px 0; flex-wrap:wrap;}
+  .filter-chip{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; padding:6px 12px; border-radius:100px;
+    border:1px solid var(--line); background:var(--paper); cursor:pointer; color:var(--ink-soft);
+  }
+  .filter-chip.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
+  .disclaimer{
+    font-size:12px; line-height:1.6; color:var(--graphite); background:var(--paper-dim);
+    border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-top:8px;
+  }
+
+  footer{text-align:center; font-size:11.5px; color:var(--graphite); padding:30px 20px; font-family:'IBM Plex Mono',monospace;}
+</style>
+</head>
+<body>
+  <div id="topbar">
+    <div class="brand">
+      <div class="mark">S</div>
+      <div>
+        <div class="name">Simulasi SBMPTN Kedokteran</div>
+        <div class="sub">TPA · TKDA · Psikotes</div>
+      </div>
+    </div>
+    <button class="home-link" id="homeBtn" onclick="goHome()">← Kembali ke Beranda</button>
+  </div>
+  <div id="app"></div>
+  <footer>Dibuat sebagai alat simulasi belajar mandiri — bukan pengganti tes resmi atau pemeriksaan medis/psikologis profesional.</footer>
+
+<script>
+/* ============================================================
+   DATA: TPA & TKDA — Tes Potensi Akademik / Tes Kemampuan Dasar Akademik
+   Materi disusun orisinal dengan gaya soal ujian masuk PTN jalur
+   Saintek/Kedokteran: Biologi, Matematika, Bahasa Inggris, Bahasa Indonesia.
+   ============================================================ */
+
+const TPA_QUESTIONS = [
+  // ---------------- BIOLOGI (13) ----------------
+  {subject:"Biologi", q:"Organel sel yang berfungsi sebagai tempat utama respirasi seluler untuk menghasilkan ATP adalah:",
+   options:["Ribosom","Mitokondria","Badan Golgi","Retikulum endoplasma"], correct:1,
+   exp:"Mitokondria disebut 'pembangkit tenaga sel' karena di sinilah terjadi respirasi aerob (siklus Krebs dan rantai transpor elektron) yang menghasilkan ATP dalam jumlah besar."},
+  {subject:"Biologi", q:"Pada persilangan monohibrid Mm x Mm dengan M dominan penuh, perbandingan fenotipe keturunannya adalah:",
+   options:["1:1","3:1","1:2:1","9:3:3:1"], correct:1,
+   exp:"Persilangan Mm x Mm menghasilkan genotipe 1 MM : 2 Mm : 1 mm. Karena M dominan penuh, MM dan Mm menunjukkan fenotipe sama, sehingga perbandingan fenotipe dominan:resesif = 3:1."},
+  {subject:"Biologi", q:"Tahap fotosintesis yang menghasilkan O2 dan berlangsung di membran tilakoid disebut:",
+   options:["Siklus Calvin","Reaksi terang","Fiksasi karbon","Fotorespirasi"], correct:1,
+   exp:"Reaksi terang terjadi di membran tilakoid, memecah molekul air (fotolisis) sehingga melepaskan O2, serta menghasilkan ATP dan NADPH untuk digunakan pada siklus Calvin."},
+  {subject:"Biologi", q:"Enzim pepsin yang berperan mencerna protein di lambung bekerja optimal pada kondisi:",
+   options:["Basa kuat (pH 9-10)","Netral (pH 7)","Asam (pH 1,5-2)","Tidak dipengaruhi pH"], correct:2,
+   exp:"Pepsin diaktifkan oleh asam lambung (HCl) dan bekerja optimal pada pH sangat asam sekitar 1,5-2, sesuai kondisi lambung."},
+  {subject:"Biologi", q:"Dalam rantai makanan sawah: padi → tikus → ular → elang, tikus berperan sebagai:",
+   options:["Produsen","Konsumen tingkat I","Konsumen tingkat II","Dekomposer"], correct:1,
+   exp:"Padi adalah produsen. Tikus memakan padi secara langsung sehingga berkedudukan sebagai konsumen tingkat I (konsumen primer)."},
+  {subject:"Biologi", q:"Struktur yang menjadi bukti homologi antara sayap kelelawar, sirip paus, dan tangan manusia mendukung teori:",
+   options:["Mutasi buatan","Evolusi dan nenek moyang bersama","Adaptasi tingkah laku","Seleksi buatan"], correct:1,
+   exp:"Organ homolog (struktur dasar sama, fungsi berbeda) menunjukkan bahwa organisme tersebut berasal dari nenek moyang yang sama, menjadi salah satu bukti evolusi."},
+  {subject:"Biologi", q:"Urutan takson dari yang paling umum ke paling khusus yang benar adalah:",
+   options:["Spesies-Genus-Famili-Ordo-Kelas-Filum-Kingdom","Kingdom-Filum-Kelas-Ordo-Famili-Genus-Spesies","Kingdom-Kelas-Filum-Famili-Ordo-Genus-Spesies","Filum-Kingdom-Kelas-Ordo-Famili-Genus-Spesies"], correct:1,
+   exp:"Urutan takson dari umum ke khusus (top-down) adalah Kingdom, Filum, Kelas, Ordo, Famili, Genus, Spesies."},
+  {subject:"Biologi", q:"Neuron yang membawa impuls dari reseptor (indra) menuju sistem saraf pusat disebut:",
+   options:["Neuron motorik","Neuron sensorik","Interneuron","Neuron konektor"], correct:1,
+   exp:"Neuron sensorik (aferen) menghantarkan impuls dari reseptor di kulit atau organ indra menuju otak/sumsum tulang belakang."},
+  {subject:"Biologi", q:"Proses pembelahan sel yang menghasilkan sel gamet dengan jumlah kromosom setengah dari sel induk adalah:",
+   options:["Mitosis","Meiosis","Amitosis","Sitokinesis"], correct:1,
+   exp:"Meiosis adalah pembelahan reduksi yang menghasilkan empat sel anak (gamet) dengan jumlah kromosom haploid (n), setengah dari sel induk diploid (2n)."},
+  {subject:"Biologi", q:"Bioteknologi yang memanfaatkan Saccharomyces cerevisiae untuk mengubah glukosa menjadi alkohol dan CO2 disebut:",
+   options:["Fermentasi asam laktat","Fermentasi alkohol","Fiksasi nitrogen","Rekayasa genetika"], correct:1,
+   exp:"Saccharomyces cerevisiae (ragi) melakukan fermentasi alkohol, mengubah glukosa menjadi etanol dan CO2 secara anaerob, dimanfaatkan dalam pembuatan tapai dan roti."},
+  {subject:"Biologi", q:"Golongan darah seseorang dengan aglutinogen A dan B pada eritrosit serta tanpa aglutinin dalam plasma adalah:",
+   options:["Golongan A","Golongan B","Golongan AB","Golongan O"], correct:2,
+   exp:"Golongan darah AB memiliki kedua jenis aglutinogen (A dan B) pada permukaan eritrosit tetapi tidak memiliki aglutinin anti-A maupun anti-B dalam plasmanya, sehingga disebut resipien universal."},
+  {subject:"Biologi", q:"Virus tidak dapat digolongkan sebagai makhluk hidup sepenuhnya karena virus:",
+   options:["Memiliki materi genetik","Dapat bermutasi","Tidak dapat bermetabolisme dan bereproduksi sendiri di luar sel inang","Berukuran sangat kecil"], correct:2,
+   exp:"Virus bersifat aseluler dan tidak dapat melakukan metabolisme maupun replikasi tanpa menginfeksi sel inang, sehingga dianggap berada di ambang batas makhluk hidup dan benda mati."},
+  {subject:"Biologi", q:"Hormon yang berperan menurunkan kadar glukosa darah dengan mendorong sel menyerap glukosa adalah:",
+   options:["Glukagon","Insulin","Adrenalin","Tiroksin"], correct:1,
+   exp:"Insulin disekresikan sel beta pankreas dan menurunkan kadar gula darah dengan meningkatkan penyerapan glukosa oleh sel serta menyimpannya sebagai glikogen di hati."},
+
+  // ---------------- MATEMATIKA (13) ----------------
+  {subject:"Matematika", q:"Jika 3x − 7 = 2x + 5, maka nilai x adalah:",
+   options:["8","10","12","14"], correct:1,
+   exp:"3x − 7 = 2x + 5 → 3x − 2x = 5 + 7 → x = 12. (Periksa ulang: 3(12)-7=29, 2(12)+5=29, cocok) Sehingga x = 12."},
+  {subject:"Matematika", q:"Suku ke-10 dari barisan aritmetika 2, 5, 8, 11, ... adalah:",
+   options:["27","29","30","32"], correct:1,
+   exp:"Beda b = 3, suku pertama a=2. Un = a+(n-1)b = 2+(10-1)(3) = 2+27 = 29."},
+  {subject:"Matematika", q:"Hasil dari (2/3) + (1/4) adalah:",
+   options:["3/7","11/12","5/6","7/12"], correct:1,
+   exp:"Samakan penyebut (KPK 3 dan 4 = 12): 2/3=8/12, 1/4=3/12. Jumlah = 8/12+3/12 = 11/12."},
+  {subject:"Matematika", q:"Sebuah dadu dilempar sekali. Peluang muncul mata dadu bilangan prima adalah:",
+   options:["1/6","1/3","1/2","2/3"], correct:2,
+   exp:"Bilangan prima pada dadu (1-6) adalah 2, 3, 5 → 3 kejadian dari 6 kemungkinan. Peluang = 3/6 = 1/2."},
+  {subject:"Matematika", q:"Keliling lingkaran dengan jari-jari 14 cm (π = 22/7) adalah:",
+   options:["44 cm","66 cm","88 cm","98 cm"], correct:2,
+   exp:"Keliling = 2πr = 2 × 22/7 × 14 = 2 × 44 = 88 cm."},
+  {subject:"Matematika", q:"Nilai dari log₂ 32 adalah:",
+   options:["3","4","5","6"], correct:2,
+   exp:"log₂ 32 = log₂ 2⁵ = 5, karena 2⁵ = 32."},
+  {subject:"Matematika", q:"Akar-akar persamaan kuadrat x² − 5x + 6 = 0 adalah:",
+   options:["1 dan 6","2 dan 3","−2 dan −3","3 dan −2"], correct:1,
+   exp:"x² − 5x + 6 = (x-2)(x-3) = 0, sehingga x = 2 atau x = 3, karena 2×3=6 dan 2+3=5."},
+  {subject:"Matematika", q:"Jika sin θ = 3/5 dan θ sudut lancip, maka nilai cos θ adalah:",
+   options:["3/5","4/5","5/4","5/3"], correct:1,
+   exp:"Menggunakan tripel Pythagoras 3-4-5: sisi depan=3, miring=5, sisi samping=√(5²-3²)=4. cos θ = samping/miring = 4/5."},
+  {subject:"Matematika", q:"Median dari data: 7, 3, 9, 5, 11, 4, 8 adalah:",
+   options:["5","7","8","9"], correct:1,
+   exp:"Urutkan data: 3,4,5,7,8,9,11 (7 data). Median adalah data tengah (ke-4) = 7."},
+  {subject:"Matematika", q:"Fungsi f(x) = 2x + 3 dan g(x) = x − 1. Nilai (f∘g)(4) adalah:",
+   options:["8","9","10","11"], correct:1,
+   exp:"g(4) = 4−1 = 3. f(g(4)) = f(3) = 2(3)+3 = 9."},
+  {subject:"Matematika", q:"Sebuah mobil menempuh 240 km dalam 4 jam. Jika kecepatan konstan, waktu untuk menempuh 360 km adalah:",
+   options:["5 jam","5,5 jam","6 jam","6,5 jam"], correct:2,
+   exp:"Kecepatan = 240/4 = 60 km/jam. Waktu = 360/60 = 6 jam."},
+  {subject:"Matematika", q:"Determinan dari matriks [[2,3],[1,4]] adalah:",
+   options:["5","8","11","−5"], correct:0,
+   exp:"Determinan matriks 2x2 [[a,b],[c,d]] = ad − bc = (2×4) − (3×1) = 8 − 3 = 5."},
+  {subject:"Matematika", q:"Hasil turunan pertama dari f(x) = 3x² − 4x + 7 adalah:",
+   options:["6x − 4","3x − 4","6x + 7","6x² − 4"], correct:0,
+   exp:"Turunkan tiap suku: d/dx(3x²)=6x, d/dx(−4x)=−4, d/dx(7)=0. Jadi f'(x)=6x−4."},
+
+  // ---------------- BAHASA INGGRIS (12) ----------------
+  {subject:"Bahasa Inggris", q:"Choose the correct tense: 'By the time the doctor arrived, the patient ___ already ___.'",
+   options:["has / recovered","had / recovered","have / recover","was / recovering"], correct:1,
+   exp:"Kejadian yang sudah selesai sebelum kejadian lampau lain menggunakan Past Perfect Tense: 'had already recovered'."},
+  {subject:"Bahasa Inggris", q:"Choose the synonym of 'meticulous':",
+   options:["Careless","Very careful and precise","Fast","Confident"], correct:1,
+   exp:"'Meticulous' berarti sangat teliti dan berhati-hati terhadap detail, sinonimnya 'very careful and precise'."},
+  {subject:"Bahasa Inggris", q:"Passive voice of: 'The nurse administers the medicine every morning.'",
+   options:["The medicine is administered by the nurse every morning.","The medicine was administered by the nurse every morning.","The medicine administers the nurse every morning.","The nurse is administered by the medicine every morning."], correct:0,
+   exp:"Kalimat aktif present simple 'administers' diubah menjadi passive present simple: 'is administered by'. Subjek kalimat aktif (the nurse) menjadi pelaku (by the nurse)."},
+  {subject:"Bahasa Inggris", q:"Fill in the blank: 'She is allergic ___ peanuts.'",
+   options:["with","of","to","for"], correct:2,
+   exp:"Preposisi yang tepat untuk 'allergic' adalah 'to', sehingga menjadi 'allergic to peanuts'."},
+  {subject:"Bahasa Inggris", q:"Choose the antonym of 'benign' (in medical context):",
+   options:["Harmless","Malignant","Mild","Curable"], correct:1,
+   exp:"Dalam konteks medis, 'benign' (jinak) berlawanan makna dengan 'malignant' (ganas)."},
+  {subject:"Bahasa Inggris", q:"Conditional sentence: 'If I ___ more time, I would study biochemistry in depth.'",
+   options:["have","had","will have","has"], correct:1,
+   exp:"Ini adalah conditional type 2 (pengandaian tidak nyata masa kini), menggunakan Past Simple pada if-clause: 'If I had...'."},
+  {subject:"Bahasa Inggris", q:"Reading comprehension: 'The human heart pumps blood through a network of vessels. When the heart contracts, blood is pushed into the arteries, increasing arterial pressure momentarily.' What causes the momentary increase in arterial pressure?",
+   options:["Blood leaving the veins","The heart's contraction pushing blood into arteries","The relaxation of the heart","A decrease in blood volume"], correct:1,
+   exp:"Paragraf menyatakan bahwa kontraksi jantung mendorong darah ke arteri, sehingga tekanan arteri meningkat sesaat — jawaban langsung terdapat pada kalimat kedua teks."},
+  {subject:"Bahasa Inggris", q:"Choose the correct degree of comparison: 'Malaria is ___ dangerous than the common cold.'",
+   options:["more","most","much more","the most"], correct:0,
+   exp:"Perbandingan dua hal (comparative) untuk kata sifat lebih dari dua suku kata menggunakan 'more + adjective': 'more dangerous than'."},
+  {subject:"Bahasa Inggris", q:"The word 'chronic' most nearly means:",
+   options:["Sudden and brief","Persisting for a long time","Extremely painful","Easily cured"], correct:1,
+   exp:"'Chronic' menggambarkan kondisi yang berlangsung lama atau berulang, berlawanan dengan 'acute' yang bersifat mendadak dan singkat."},
+  {subject:"Bahasa Inggris", q:"Choose the grammatically correct sentence:",
+   options:["Neither the doctor nor the nurses was informed.","Neither the doctor nor the nurses were informed.","Neither the doctor or the nurses were informed.","Neither the doctor nor the nurses is informed."], correct:1,
+   exp:"Pada struktur 'neither...nor', kata kerja mengikuti subjek yang paling dekat (nurses, jamak), sehingga digunakan 'were'."},
+  {subject:"Bahasa Inggris", q:"Choose the correct word: 'The results of the experiment were ___ with the initial hypothesis.'",
+   options:["consistent","persistent","resistant","insistent"], correct:0,
+   exp:"'Consistent with' berarti sejalan/sesuai dengan sesuatu, tepat digunakan untuk menyatakan hasil percobaan yang sesuai hipotesis."},
+  {subject:"Bahasa Inggris", q:"Identify the correct question tag: 'You haven't finished the report, ___?'",
+   options:["have you","haven't you","did you","don't you"], correct:0,
+   exp:"Kalimat utama negatif ('haven't') diikuti question tag positif: 'have you'."},
+
+  // ---------------- BAHASA INDONESIA (12) ----------------
+  {subject:"Bahasa Indonesia", q:"Kalimat berikut yang menggunakan ejaan baku dengan benar adalah:",
+   options:["Dokter itu praktek setiap hari Senin.","Dokter itu praktik setiap hari Senin.","Dokter itu prakték setiap hari Senin.","Dokter itu praktik'e setiap hari Senin."], correct:1,
+   exp:"Bentuk baku sesuai KBBI adalah 'praktik', bukan 'praktek'."},
+  {subject:"Bahasa Indonesia", q:"Sinonim dari kata 'empati' adalah:",
+   options:["Acuh tak acuh","Kepekaan merasakan keadaan orang lain","Kemarahan","Ketidakpedulian"], correct:1,
+   exp:"'Empati' berarti kemampuan memahami dan merasakan apa yang dirasakan orang lain, sinonimnya adalah kepekaan terhadap keadaan orang lain."},
+  {subject:"Bahasa Indonesia", q:"Ide pokok paragraf biasanya terletak pada:",
+   options:["Selalu di akhir paragraf","Selalu di tengah paragraf","Kalimat utama, yang bisa di awal, akhir, atau keduanya","Setiap kalimat penjelas"], correct:2,
+   exp:"Ide pokok terkandung dalam kalimat utama, yang letaknya bisa bervariasi: di awal (deduktif), di akhir (induktif), atau di awal dan akhir (campuran)."},
+  {subject:"Bahasa Indonesia", q:"Kalimat efektif dari kalimat 'Para dokter-dokter itu sedang melakukan penelitian' adalah:",
+   options:["Para dokter itu sedang melakukan penelitian.","Dokter-dokter itu sedang melakukan penelitian-penelitian.","Para dokter itu sedang melakukan penelitian-penelitian.","Semua para dokter melakukan penelitian."], correct:0,
+   exp:"Kata 'para' sudah menunjukkan makna jamak sehingga tidak perlu diulang dengan bentuk 'dokter-dokter' (pleonasme). Bentuk efektif: 'Para dokter itu sedang melakukan penelitian.'"},
+  {subject:"Bahasa Indonesia", q:"Majas yang terdapat pada kalimat 'Jantungnya berhenti berdetak seketika mendengar kabar itu' adalah:",
+   options:["Metafora","Hiperbola","Personifikasi","Litotes"], correct:1,
+   exp:"Kalimat tersebut melebih-lebihkan reaksi emosional (jantung berhenti berdetak) sehingga tergolong majas hiperbola."},
+  {subject:"Bahasa Indonesia", q:"Paragraf yang diawali dengan kalimat umum kemudian diikuti kalimat-kalimat khusus disebut paragraf:",
+   options:["Induktif","Deduktif","Naratif","Deskriptif"], correct:1,
+   exp:"Paragraf deduktif dimulai dengan kalimat utama (gagasan umum) di awal, diikuti kalimat penjelas yang lebih khusus."},
+  {subject:"Bahasa Indonesia", q:"Konjungsi yang tepat untuk melengkapi kalimat 'Ia tetap masuk kerja ___ sedang sakit.' adalah:",
+   options:["karena","meskipun","sehingga","apabila"], correct:1,
+   exp:"Kalimat menyatakan pertentangan (tetap masuk kerja walau sakit), sehingga konjungsi yang tepat adalah 'meskipun' yang menyatakan makna konsesif."},
+  {subject:"Bahasa Indonesia", q:"Kata baku yang benar di antara pilihan berikut adalah:",
+   options:["analisa","apotik","hipotesis","sistim"], correct:2,
+   exp:"'Hipotesis' merupakan bentuk baku. Bentuk baku lainnya: analisis (bukan analisa), apotek (bukan apotik), sistem (bukan sistim)."},
+  {subject:"Bahasa Indonesia", q:"Antonim dari kata 'akut' dalam konteks medis adalah:",
+   options:["Parah","Kronis","Mendadak","Ringan"], correct:1,
+   exp:"'Akut' menggambarkan kondisi yang muncul tiba-tiba dan berlangsung singkat, berlawanan dengan 'kronis' yang berlangsung lama."},
+  {subject:"Bahasa Indonesia", q:"Kalimat yang menggunakan tanda baca dengan tepat adalah:",
+   options:["Ia membeli, obat, vitamin, dan masker.","Ia membeli obat, vitamin, dan masker.","Ia membeli obat vitamin dan masker.","Ia membeli obat; vitamin, dan masker."], correct:1,
+   exp:"Tanda koma digunakan untuk memisahkan unsur-unsur dalam suatu perincian: 'obat, vitamin, dan masker' — tanpa koma sebelum unsur pertama."},
+  {subject:"Bahasa Indonesia", q:"Teks yang bertujuan menggambarkan objek secara rinci sehingga pembaca seolah melihat, mendengar, atau merasakan langsung disebut teks:",
+   options:["Eksposisi","Deskripsi","Argumentasi","Persuasi"], correct:1,
+   exp:"Teks deskripsi bertujuan melukiskan suatu objek secara detail dan konkret agar pembaca dapat membayangkan objek tersebut seolah mengalaminya sendiri."},
+  {subject:"Bahasa Indonesia", q:"Penulisan gelar yang tepat sesuai kaidah adalah:",
+   options:["dr. Amir, Sp.PD","Dr Amir Sp PD","dr Amir, SpPD","Dokter. Amir, Sp,PD"], correct:0,
+   exp:"Penulisan gelar dokter umum diikuti tanda titik 'dr.' (huruf kecil) dan gelar spesialis ditulis dengan tanda titik antar singkatan, contoh 'Sp.PD', dipisah koma dari nama."},
+];
+
+/* ============================================================
+   DATA: TES BUTA WARNA — 20 lempeng bergaya Ishihara (disimulasikan,
+   digambar prosedural memakai kanvas titik-titik berwarna, BUKAN
+   reproduksi gambar lempeng Ishihara asli/berhak cipta).
+   ============================================================ */
+const COLORBLIND_PLATES = [
+  {id:1, number:"12", type:"kontrol", fig:"#E08A2E", bg:"#5F8F63", note:"Lempeng kontrol: dapat terlihat oleh hampir seluruh orang dengan penglihatan warna normal maupun sebagian besar defisiensi ringan."},
+  {id:2, number:"8",  type:"kontrol", fig:"#D9673F", bg:"#5C8A6E", note:"Lempeng kontrol dasar untuk memastikan peserta memahami cara membaca pola titik."},
+  {id:3, number:"29", type:"merah-hijau", fig:"#C6673A", bg:"#7FA06A", note:"Kombinasi oranye-kemerahan pada latar hijau zaitun ini umum sulit dibedakan oleh defisiensi merah-hijau (deuteranomali/protanomali)."},
+  {id:4, number:"5",  type:"merah-hijau", fig:"#B5583A", bg:"#6E8F55", note:"Kontras merah-bata dan hijau lumut adalah pasangan klasik yang membaur bagi mata dengan defisiensi merah-hijau."},
+  {id:5, number:"3",  type:"merah-hijau", fig:"#CD7A46", bg:"#5E8C6A", note:"Digit dengan saturasi sedang; penglihatan normal membacanya jelas, defisiensi sedang-berat sering melewatkannya."},
+  {id:6, number:"15", type:"merah-hijau", fig:"#BE5B3E", bg:"#71915E", note:"Pola dua digit menguji konsistensi persepsi pada area figur yang lebih luas."},
+  {id:7, number:"74", type:"tersembunyi", fig:"#9E7A56", bg:"#8C9468", note:"Lempeng 'tersembunyi': angka ini didesain agar cenderung TIDAK terlihat oleh mata normal, namun dapat tampak bagi sebagian defisiensi warna tertentu."},
+  {id:8, number:"45", type:"biru-kuning", fig:"#4E7FA6", bg:"#B7A24A", note:"Kombinasi biru-kuning ini menguji defisiensi tritan (jarang terjadi), berbeda dari uji merah-hijau pada umumnya."},
+  {id:9, number:"6",  type:"kontrol", fig:"#C85A38", bg:"#5C8C68", note:"Lempeng kontrol tambahan dengan ukuran digit lebih kecil untuk menguji ketajaman diskriminasi."},
+  {id:10, number:"97", type:"merah-hijau", fig:"#C46A3E", bg:"#6B8E5A", note:"Dua digit bersambung menguji kemampuan memisahkan batas figur dari latar secara menyeluruh."},
+  {id:11, number:"2",  type:"tersembunyi", fig:"#A47A52", bg:"#8FA05F", note:"Digit tersembunyi lain — pola ini umumnya luput dari penglihatan normal tetapi dapat terlihat oleh sebagian defisiensi."},
+  {id:12, number:"26", type:"merah-hijau", fig:"#B9603E", bg:"#6F9463", note:"Uji standar defisiensi merah-hijau dengan dua digit."},
+  {id:13, number:"42", type:"merah-hijau", fig:"#CE7143", bg:"#5A8A5E", note:"Kontras oranye tua dan hijau tua, salah satu pasangan paling representatif untuk skrining awal."},
+  {id:14, number:"9",  type:"biru-kuning", fig:"#4A72A0", bg:"#C2A93F", note:"Digit tunggal dengan kombinasi biru-kuning untuk variasi uji tritan."},
+  {id:15, number:"57", type:"merah-hijau", fig:"#B85B3A", bg:"#6C8F5D", note:"Dua digit dengan ukuran titik lebih variatif menguji ketahanan persepsi pada tekstur ramai."},
+  {id:16, number:"0",  type:"kontrol", fig:"#CB6A3F", bg:"#5D8C66", note:"Lempeng kontrol akhir, bila tidak terbaca menandakan kesulitan diskriminasi warna dasar, bukan hanya merah-hijau."},
+  {id:17, number:"73", type:"merah-hijau", fig:"#C1653C", bg:"#71925F", note:"Kombinasi umum dipakai pada skrining kesehatan/pendidikan kedokteran untuk menilai derajat keparahan defisiensi."},
+  {id:18, number:"16", type:"merah-hijau", fig:"#B65E3D", bg:"#688E5A", note:"Digit dua angka dengan kepadatan titik tinggi menguji ambang diskriminasi warna halus."},
+  {id:19, number:"35", type:"tersembunyi", fig:"#A17C55", bg:"#8A9C62", note:"Lempeng tersembunyi terakhir sebagai pembanding pola no. 7 dan 11."},
+  {id:20, number:"96", type:"biru-kuning", fig:"#4B76A3", bg:"#BFA544", note:"Lempeng biru-kuning penutup untuk melengkapi cakupan jenis defisiensi yang diuji."},
+];
+
+/* ============================================================
+   DATA: TES IQ BERGAMBAR — 30 soal penalaran visual bergaya matriks
+   (mirip Raven's Progressive Matrices), digambar prosedural dengan SVG.
+   ============================================================ */
+const IQ_SHAPES = ["circle","square","triangle","pentagon","hexagon","star"];
+const IQ_COLORS = ["#C4502B","#0F766E","#3F7A54","#8A6D3B","#5B6472","#1B2A4A"];
+
+const IQ_PUZZLE_CONFIGS = [
+  {id:1, shape:"circle",   mode:"size-rotate"},
+  {id:2, shape:"square",   mode:"color-cycle"},
+  {id:3, shape:"triangle", mode:"size-rotate"},
+  {id:4, shape:"pentagon", mode:"color-cycle"},
+  {id:5, shape:"hexagon",  mode:"size-rotate"},
+  {id:6, shape:"star",     mode:"color-cycle"},
+  {id:7, shape:"circle",   mode:"count-grid"},
+  {id:8, shape:"square",   mode:"size-rotate"},
+  {id:9, shape:"triangle", mode:"color-cycle"},
+  {id:10, shape:"pentagon", mode:"count-grid"},
+  {id:11, shape:"hexagon",  mode:"color-cycle"},
+  {id:12, shape:"star",     mode:"size-rotate"},
+  {id:13, shape:"circle",   mode:"color-cycle"},
+  {id:14, shape:"square",   mode:"count-grid"},
+  {id:15, shape:"triangle", mode:"size-rotate"},
+  {id:16, shape:"pentagon", mode:"size-rotate"},
+  {id:17, shape:"hexagon",  mode:"count-grid"},
+  {id:18, shape:"star",     mode:"color-cycle"},
+  {id:19, shape:"circle",   mode:"size-rotate"},
+  {id:20, shape:"square",   mode:"color-cycle"},
+  {id:21, shape:"triangle", mode:"count-grid"},
+  {id:22, shape:"pentagon", mode:"color-cycle"},
+  {id:23, shape:"hexagon",  mode:"size-rotate"},
+  {id:24, shape:"star",     mode:"count-grid"},
+  {id:25, shape:"circle",   mode:"color-cycle"},
+  {id:26, shape:"square",   mode:"size-rotate"},
+  {id:27, shape:"triangle", mode:"color-cycle"},
+  {id:28, shape:"pentagon", mode:"size-rotate"},
+  {id:29, shape:"hexagon",  mode:"color-cycle"},
+  {id:30, shape:"star",     mode:"size-rotate"},
+];
+
+/* ============================================================
+   DATA: TES KEPRIBADIAN — terinspirasi struktur inventori MMPI
+   (BUKAN item asli MMPI yang berhak cipta/klinis; ini adalah kuesioner
+   orisinal untuk simulasi edukatif, 8 skala x 5 pernyataan = 40 item).
+   reverse:true artinya "Setuju" justru MENURUNKAN skor skala tsb.
+   ============================================================ */
+const PERSONALITY_ITEMS = [
+  {id:1, scale:"Stabilitas Emosi", text:"Saya cenderung tetap tenang meskipun berada dalam situasi mendesak.", reverse:false},
+  {id:2, scale:"Stabilitas Emosi", text:"Suasana hati saya mudah berubah drastis dalam sehari.", reverse:true},
+  {id:3, scale:"Stabilitas Emosi", text:"Saya jarang merasa kewalahan oleh emosi saya sendiri.", reverse:false},
+  {id:4, scale:"Stabilitas Emosi", text:"Kritik kecil dari orang lain bisa membuat saya kesal sepanjang hari.", reverse:true},
+  {id:5, scale:"Stabilitas Emosi", text:"Saya bisa memulihkan diri dengan cepat setelah mengalami kekecewaan.", reverse:false},
+  {id:6, scale:"Sosiabilitas", text:"Saya merasa berenergi setelah menghabiskan waktu bersama banyak orang.", reverse:false},
+  {id:7, scale:"Sosiabilitas", text:"Saya lebih suka bekerja sendirian daripada dalam kelompok besar.", reverse:true},
+  {id:8, scale:"Sosiabilitas", text:"Memulai percakapan dengan orang baru terasa mudah bagi saya.", reverse:false},
+  {id:9, scale:"Sosiabilitas", text:"Saya cenderung diam di acara-acara sosial yang ramai.", reverse:true},
+  {id:10, scale:"Sosiabilitas", text:"Saya senang menjadi pusat perhatian dalam suatu kelompok.", reverse:false},
+  {id:11, scale:"Kedisiplinan", text:"Saya selalu menyelesaikan tugas sebelum tenggat waktu.", reverse:false},
+  {id:12, scale:"Kedisiplinan", text:"Saya sering menunda pekerjaan sampai menit-menit terakhir.", reverse:true},
+  {id:13, scale:"Kedisiplinan", text:"Saya membuat rencana harian dan berusaha mengikutinya.", reverse:false},
+  {id:14, scale:"Kedisiplinan", text:"Meja atau ruang kerja saya sering berantakan dan tidak teratur.", reverse:true},
+  {id:15, scale:"Kedisiplinan", text:"Saya memeriksa kembali pekerjaan saya sebelum menganggapnya selesai.", reverse:false},
+  {id:16, scale:"Toleransi Stres", text:"Saya dapat tetap fokus meski menghadapi banyak tekanan sekaligus.", reverse:false},
+  {id:17, scale:"Toleransi Stres", text:"Saat beban tugas menumpuk, saya cepat merasa panik.", reverse:true},
+  {id:18, scale:"Toleransi Stres", text:"Saya mampu berpikir jernih dalam situasi darurat.", reverse:false},
+  {id:19, scale:"Toleransi Stres", text:"Tidur saya sering terganggu ketika saya memiliki banyak tanggung jawab.", reverse:true},
+  {id:20, scale:"Toleransi Stres", text:"Saya menganggap tekanan sebagai tantangan, bukan ancaman.", reverse:false},
+  {id:21, scale:"Keterbukaan", text:"Saya senang mempelajari hal-hal baru di luar bidang saya.", reverse:false},
+  {id:22, scale:"Keterbukaan", text:"Saya lebih nyaman dengan cara-cara lama yang sudah terbukti daripada mencoba metode baru.", reverse:true},
+  {id:23, scale:"Keterbukaan", text:"Saya tertarik mendiskusikan ide-ide abstrak atau teori.", reverse:false},
+  {id:24, scale:"Keterbukaan", text:"Perubahan mendadak dalam rencana membuat saya sangat tidak nyaman.", reverse:true},
+  {id:25, scale:"Keterbukaan", text:"Saya senang mencoba pendekatan berbeda saat memecahkan masalah.", reverse:false},
+  {id:26, scale:"Kecenderungan Cemas", text:"Saya sering mengkhawatirkan hal-hal yang belum tentu terjadi.", reverse:false},
+  {id:27, scale:"Kecenderungan Cemas", text:"Saya jarang merasa gelisah tanpa alasan yang jelas.", reverse:true},
+  {id:28, scale:"Kecenderungan Cemas", text:"Jantung saya berdebar kencang saat memikirkan hasil ujian atau evaluasi.", reverse:false},
+  {id:29, scale:"Kecenderungan Cemas", text:"Saya mudah tidur nyenyak walau ada masalah yang belum terselesaikan.", reverse:true},
+  {id:30, scale:"Kecenderungan Cemas", text:"Saya sering memikirkan ulang percakapan lama karena takut salah bicara.", reverse:false},
+  {id:31, scale:"Empati Sosial", text:"Saya mudah merasakan apa yang dirasakan orang lain di sekitar saya.", reverse:false},
+  {id:32, scale:"Empati Sosial", text:"Masalah orang lain jarang benar-benar mempengaruhi perasaan saya.", reverse:true},
+  {id:33, scale:"Empati Sosial", text:"Saya sering menjadi tempat curhat teman-teman saya.", reverse:false},
+  {id:34, scale:"Empati Sosial", text:"Saya cenderung fokus pada kepentingan saya sendiri dibanding orang lain.", reverse:true},
+  {id:35, scale:"Empati Sosial", text:"Saya berusaha memahami sudut pandang orang lain sebelum menilai.", reverse:false},
+  {id:36, scale:"Optimisme", text:"Saya yakin masa depan saya akan berjalan baik meski ada tantangan.", reverse:false},
+  {id:37, scale:"Optimisme", text:"Saya sering membayangkan skenario terburuk akan terjadi.", reverse:true},
+  {id:38, scale:"Optimisme", text:"Saya melihat kegagalan sebagai kesempatan untuk belajar.", reverse:false},
+  {id:39, scale:"Optimisme", text:"Saya merasa usaha saya jarang membuahkan hasil yang berarti.", reverse:true},
+  {id:40, scale:"Optimisme", text:"Saya memulai hari dengan harapan yang positif.", reverse:false},
+];
+
+</script>
+<script>
+/* ============================================================
+   APP LOGIC — router + test engine + scoring + report rendering
+   ============================================================ */
+
+const app = document.getElementById('app');
+const homeBtn = document.getElementById('homeBtn');
+
+let state = {
+  test: null,      // 'tpa' | 'colorblind' | 'iq' | 'personality'
+  index: 0,
+  answers: {},      // idx -> selected option index (or value)
+  items: [],        // active question set
+};
+
+function goHome(){
+  homeBtn.classList.remove('show');
+  state = {test:null, index:0, answers:{}, items:[]};
+  renderHome();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ---------------- HOME ---------------- */
+function renderHome(){
+  app.innerHTML = `
+    <div class="hero">
+      <span class="eyebrow">Simulasi Ujian Masuk PTN — Jalur Kedokteran / Saintek</span>
+      <h1 style="margin-top:10px;">Latihan lengkap: akademik &amp; psikotes dalam satu tempat.</h1>
+      <p class="lead">Empat modul simulasi dengan gaya soal seperti yang sering muncul pada seleksi masuk perguruan tinggi jalur kedokteran: tes potensi akademik, skrining buta warna, penalaran visual (IQ), dan inventori kepribadian. Setiap sesi diakhiri laporan hasil lengkap dengan alasan jawaban.</p>
+      <div class="badge-row">
+        <span class="badge">50 soal TPA/TKDA</span>
+        <span class="badge">20 lempeng buta warna</span>
+        <span class="badge">30 soal IQ bergambar</span>
+        <span class="badge">40 item kepribadian</span>
+      </div>
+    </div>
+
+    <div class="grid-cards">
+      <button class="test-card" onclick="startTPA()">
+        <div class="num"><span class="dot"></span>MODUL 01</div>
+        <h3>TPA &amp; TKDA</h3>
+        <p>Biologi, Matematika, Bahasa Inggris, dan Bahasa Indonesia — sesuai fokus jurusan Saintek/IPA.</p>
+        <div class="meta"><span>50 soal</span><span>±60 menit</span></div>
+      </button>
+      <button class="test-card" onclick="startColorblind()">
+        <div class="num"><span class="dot"></span>MODUL 02</div>
+        <h3>Tes Buta Warna</h3>
+        <p>Simulasi lempeng bergaya Ishihara untuk skrining awal kemampuan membedakan warna.</p>
+        <div class="meta"><span>20 lempeng</span><span>±10 menit</span></div>
+      </button>
+      <button class="test-card" onclick="startIQ()">
+        <div class="num"><span class="dot"></span>MODUL 03</div>
+        <h3>Tes IQ Bergambar</h3>
+        <p>Penalaran visual bergaya matriks: lengkapi pola bentuk, warna, ukuran, dan rotasi.</p>
+        <div class="meta"><span>30 soal</span><span>±25 menit</span></div>
+      </button>
+      <button class="test-card" onclick="startPersonality()">
+        <div class="num"><span class="dot"></span>MODUL 04</div>
+        <h3>Inventori Kepribadian</h3>
+        <p>Kuesioner reflektif terinspirasi struktur MMPI, mengukur 8 dimensi kepribadian.</p>
+        <div class="meta"><span>40 pernyataan</span><span>±15 menit</span></div>
+      </button>
+    </div>
+
+    <div class="notice">
+      <b>Catatan penting:</b> Seluruh soal akademik disusun orisinal dengan gaya dan tingkat kesulitan seleksi masuk kedokteran, bukan salinan naskah ujian resmi mana pun. Lempeng buta warna digambar secara prosedural (bukan gambar Ishihara asli) sehingga hasilnya bersifat <i>skrining awal/edukatif</i>, bukan diagnosis medis. Modul kepribadian terinspirasi struktur MMPI namun berisi pernyataan orisinal untuk tujuan simulasi belajar — <b>bukan alat diagnostik klinis</b>. Untuk hasil resmi, konsultasikan ke dokter mata (buta warna) atau psikolog/psikiater berlisensi (kepribadian).
+    </div>
+  `;
+}
+
+/* ---------------- SHARED TEST ENGINE ---------------- */
+function beginTest(testKey, items){
+  state = {test:testKey, index:0, answers:{}, items};
+  homeBtn.classList.add('show');
+  renderQuestion();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function labelFor(testKey){
+  return {
+    tpa:"TPA & TKDA", colorblind:"Tes Buta Warna", iq:"Tes IQ Bergambar", personality:"Inventori Kepribadian"
+  }[testKey];
+}
+
+function progressHTML(){
+  const total = state.items.length;
+  const answered = Object.keys(state.answers).length;
+  const pct = Math.round(((state.index+1)/total)*100);
+  return `
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="label">${labelFor(state.test)}</span>
+        <span class="count">Soal ${state.index+1} / ${total} · Terjawab ${answered}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+  `;
+}
+
+function jumpGridHTML(){
+  let html = `<div class="jump-grid">`;
+  state.items.forEach((_,i)=>{
+    const answered = state.answers[i]!==undefined;
+    const current = i===state.index;
+    html += `<button class="jump-dot ${answered?'answered':''} ${current?'current':''}" onclick="jumpTo(${i})">${i+1}</button>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function jumpTo(i){ state.index = i; renderQuestion(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function navRowHTML(){
+  const isLast = state.index === state.items.length-1;
+  const answered = state.answers[state.index]!==undefined;
+  return `
+    <div class="nav-row">
+      <button class="btn ghost" ${state.index===0?'disabled':''} onclick="prevQ()">← Sebelumnya</button>
+      ${isLast
+        ? `<button class="btn" ${answered?'':'disabled'} onclick="finishTest()">Lihat Hasil →</button>`
+        : `<button class="btn ghost" onclick="nextQ()">Lewati / Berikutnya →</button>`}
+    </div>
+  `;
+}
+
+function prevQ(){ if(state.index>0){state.index--; renderQuestion(); window.scrollTo({top:0,behavior:'smooth'});} }
+function nextQ(){ if(state.index<state.items.length-1){state.index++; renderQuestion(); window.scrollTo({top:0,behavior:'smooth'});} }
+
+function selectAnswer(value, autoAdvance=true){
+  state.answers[state.index] = value;
+  renderQuestion();
+  if(autoAdvance && state.index < state.items.length-1){
+    setTimeout(()=>{ state.index++; renderQuestion(); window.scrollTo({top:0,behavior:'smooth'}); }, 260);
+  }
+}
+
+/* ---------------- RENDER QUESTION (dispatch by test type) ---------------- */
+function renderQuestion(){
+  if(state.test==='tpa') return renderTPAQuestion();
+  if(state.test==='colorblind') return renderColorblindQuestion();
+  if(state.test==='iq') return renderIQQuestion();
+  if(state.test==='personality') return renderPersonalityQuestion();
+}
+
+/* ================= MODULE 1: TPA & TKDA ================= */
+function startTPA(){ beginTest('tpa', TPA_QUESTIONS); }
+
+function renderTPAQuestion(){
+  const q = state.items[state.index];
+  const selected = state.answers[state.index];
+  app.innerHTML = `
+    ${progressHTML()}
+    <div class="qcard">
+      <span class="qtag">${q.subject}</span>
+      <div class="qtext serif">${q.q}</div>
+      <div class="options">
+        ${q.options.map((opt,i)=>`
+          <button class="opt ${selected===i?'selected':''}" onclick="selectAnswer(${i})">
+            <span class="bubble">${String.fromCharCode(65+i)}</span>
+            <span>${opt}</span>
+          </button>
+        `).join('')}
+      </div>
+      ${navRowHTML()}
+      ${jumpGridHTML()}
+    </div>
+  `;
+}
+
+/* ================= MODULE 2: TES BUTA WARNA ================= */
+function startColorblind(){ beginTest('colorblind', COLORBLIND_PLATES); }
+
+function drawIshiharaPlate(canvas, number, figColor, bgColor){
+  const size = 300;
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,size,size);
+
+  // offscreen mask: render the number to know which pixels are "inside" the digit
+  const mask = document.createElement('canvas');
+  mask.width = size; mask.height = size;
+  const mctx = mask.getContext('2d');
+  mctx.fillStyle = '#000';
+  mctx.fillRect(0,0,size,size);
+  mctx.fillStyle = '#fff';
+  const fontScale = number.length > 1 ? 0.42 : 0.62;
+  mctx.font = `bold ${Math.floor(size*fontScale)}px 'IBM Plex Sans', sans-serif`;
+  mctx.textAlign = 'center';
+  mctx.textBaseline = 'middle';
+  mctx.fillText(number, size/2, size/2 + size*0.03);
+  const maskData = mctx.getImageData(0,0,size,size).data;
+
+  function isInsideDigit(x,y){
+    const idx = (Math.floor(y)*size + Math.floor(x)) * 4;
+    return maskData[idx] > 128; // white pixel = inside digit
+  }
+
+  // scatter circular dots across a circular plate area
+  const cx = size/2, cy = size/2, R = size/2 - 4;
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.clip();
+  ctx.fillStyle = '#F3EFE3';
+  ctx.fillRect(0,0,size,size);
+
+  function shade(hex, amt){
+    const c = hex.replace('#','');
+    const num = parseInt(c,16);
+    let r=(num>>16)+amt, g=((num>>8)&0xff)+amt, b=(num&0xff)+amt;
+    r=Math.max(0,Math.min(255,r)); g=Math.max(0,Math.min(255,g)); b=Math.max(0,Math.min(255,b));
+    return `rgb(${r},${g},${b})`;
+  }
+
+  let seed = 42;
+  function rnd(){ seed = (seed*9301+49297)%233280; return seed/233280; }
+
+  const dots = 950;
+  for(let i=0;i<dots;i++){
+    const a = rnd()*Math.PI*2;
+    const r = Math.sqrt(rnd())*R;
+    const x = cx + Math.cos(a)*r;
+    const y = cy + Math.sin(a)*r;
+    const radius = 2.4 + rnd()*4.2;
+    const inside = isInsideDigit(x,y);
+    const base = inside ? figColor : bgColor;
+    const variance = Math.floor(rnd()*24)-12;
+    ctx.beginPath();
+    ctx.arc(x,y,radius,0,Math.PI*2);
+    ctx.fillStyle = shade(base, variance);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // subtle plate ring
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2);
+  ctx.lineWidth = 2; ctx.strokeStyle = '#D8D2BF'; ctx.stroke();
+}
+
+function renderColorblindQuestion(){
+  const p = state.items[state.index];
+  const selected = state.answers[state.index];
+  const correctNum = p.number;
+  // build plausible option set: correct + distractors (digit variants) + "tidak terlihat"
+  const distractors = new Set();
+  function shiftDigits(str, d){ return str.split('').map(ch=>String((parseInt(ch)+d+10)%10)).join(''); }
+  distractors.add(shiftDigits(correctNum,1));
+  distractors.add(shiftDigits(correctNum,3));
+  let opts = [correctNum, ...Array.from(distractors)].slice(0,3);
+  opts.push('Tidak terlihat angka');
+  // stable shuffle based on plate id
+  opts = opts.sort((a,b)=> ((p.id*7+a.length)%3) - ((p.id*5+b.length)%3));
+
+  app.innerHTML = `
+    ${progressHTML()}
+    <div class="qcard">
+      <span class="qtag">Lempeng ${p.id} dari ${state.items.length} · Tipe: ${p.type}</span>
+      <div class="qtext">Angka berapa yang Anda lihat pada lingkaran berikut?</div>
+      <div class="qimg-wrap"><canvas id="plateCanvas" style="border-radius:50%; box-shadow: var(--shadow);"></canvas></div>
+      <div class="options">
+        ${opts.map((opt)=>`
+          <button class="opt ${selected===opt?'selected':''}" onclick="selectAnswer('${opt}')">
+            <span class="bubble">●</span>
+            <span>${opt}</span>
+          </button>
+        `).join('')}
+      </div>
+      ${navRowHTML()}
+      ${jumpGridHTML()}
+    </div>
+  `;
+  const canvas = document.getElementById('plateCanvas');
+  drawIshiharaPlate(canvas, p.number, p.fig, p.bg);
+}
+
+/* ================= MODULE 3: TES IQ BERGAMBAR ================= */
+function startIQ(){
+  const questions = IQ_PUZZLE_CONFIGS.map(cfg => buildMatrixPuzzle(cfg));
+  beginTest('iq', questions);
+}
+
+// Builds a 3x3 reasoning matrix puzzle + 4 SVG options (only one correct)
+function buildMatrixPuzzle(cfg){
+  const shapeIdx = IQ_SHAPES.indexOf(cfg.shape);
+  const seed = cfg.id;
+  const cells = [];
+  for(let r=0;r<3;r++){
+    for(let c=0;c<3;c++){
+      let colorIdx, size, rot, count;
+      if(cfg.mode==='size-rotate'){
+        colorIdx = (seed+2)%IQ_COLORS.length;
+        size = 26 + r*14;
+        rot = c*40;
+        count = 1;
+      } else if(cfg.mode==='color-cycle'){
+        colorIdx = (r+c+seed)%IQ_COLORS.length;
+        size = 40;
+        rot = 0;
+        count = 1;
+      } else { // count-grid
+        colorIdx = (seed+1)%IQ_COLORS.length;
+        size = 22;
+        rot = 0;
+        count = r+1; // number of shapes increases per row
+      }
+      cells.push({r,c,shape:cfg.shape,colorIdx,size,rot,count});
+    }
+  }
+  const answerCell = cells.find(x=>x.r===2 && x.c===2);
+  const correctSVG = cellToSVG(answerCell, 96);
+
+  // distractors: alter one attribute each
+  const distractors = [];
+  if(cfg.mode==='size-rotate'){
+    distractors.push(cellToSVG({...answerCell, size:answerCell.size-16}, 96));
+    distractors.push(cellToSVG({...answerCell, rot:answerCell.rot+90}, 96));
+    distractors.push(cellToSVG({...answerCell, colorIdx:(answerCell.colorIdx+1)%IQ_COLORS.length}, 96));
+  } else if(cfg.mode==='color-cycle'){
+    distractors.push(cellToSVG({...answerCell, colorIdx:(answerCell.colorIdx+1)%IQ_COLORS.length}, 96));
+    distractors.push(cellToSVG({...answerCell, colorIdx:(answerCell.colorIdx+2)%IQ_COLORS.length}, 96));
+    distractors.push(cellToSVG({...answerCell, size:answerCell.size-10}, 96));
+  } else {
+    distractors.push(cellToSVG({...answerCell, count:answerCell.count+1}, 96));
+    distractors.push(cellToSVG({...answerCell, count:Math.max(1,answerCell.count-1)}, 96));
+    distractors.push(cellToSVG({...answerCell, colorIdx:(answerCell.colorIdx+1)%IQ_COLORS.length}, 96));
+  }
+
+  const optionSVGs = [correctSVG, ...distractors];
+  // deterministic shuffle
+  const order = [0,1,2,3].sort((a,b)=> ((seed*3+a*7)%4) - ((seed*3+b*7)%4));
+  const shuffled = order.map(i=>optionSVGs[i]);
+  const correctIndex = order.indexOf(0);
+
+  const ruleText = {
+    'size-rotate': `Perhatikan pola: dari kiri ke kanan bentuk berotasi bertahap, dan dari atas ke bawah ukurannya membesar. Bentuk yang tepat untuk mengisi kotak kosong harus mengikuti kedua aturan tersebut sekaligus (ukuran terbesar pada baris ke-3, rotasi terbesar pada kolom ke-3).`,
+    'color-cycle': `Perhatikan pola warna: warna pada tiap sel mengikuti siklus berdasarkan posisi baris dan kolom. Bentuk yang tepat untuk kotak kosong adalah yang melanjutkan siklus warna tersebut secara konsisten.`,
+    'count-grid': `Perhatikan pola jumlah bentuk: setiap baris menambahkan satu bentuk dibanding baris sebelumnya. Kotak kosong berada di baris ke-3, sehingga jawaban yang tepat memuat jumlah bentuk sesuai baris tersebut.`,
+  }[cfg.mode];
+
+  return {
+    kind:'iq', cells, cfg,
+    gridSVG: cells.filter(x=>!(x.r===2&&x.c===2)).map(x=>cellToSVG(x,86)),
+    options: shuffled,
+    correct: correctIndex,
+    exp: ruleText,
+  };
+}
+
+function cellToSVG(cell, box){
+  const color = IQ_COLORS[cell.colorIdx];
+  const cxy = box/2;
+  let shapes = '';
+  const n = cell.count || 1;
+  for(let k=0;k<n;k++){
+    const offset = n>1 ? (k - (n-1)/2) * (box*0.32) : 0;
+    shapes += shapeMarkup(cell.shape, cxy+offset*0.6, cxy, cell.size*(n>1?0.6:1), color, cell.rot);
+  }
+  return `<svg width="${box}" height="${box}" viewBox="0 0 ${box} ${box}">${shapes}</svg>`;
+}
+
+function shapeMarkup(shape, cx, cy, size, color, rot){
+  const t = `translate(${cx} ${cy}) rotate(${rot||0})`;
+  switch(shape){
+    case 'circle':
+      return `<circle cx="${cx}" cy="${cy}" r="${size/2}" fill="${color}"/>`;
+    case 'square':
+      return `<rect x="${-size/2}" y="${-size/2}" width="${size}" height="${size}" fill="${color}" transform="${t}"/>`;
+    case 'triangle': {
+      const s=size/2;
+      return `<polygon points="0,${-s} ${s*0.87},${s*0.5} ${-s*0.87},${s*0.5}" fill="${color}" transform="${t}"/>`;
+    }
+    case 'pentagon': return polygonMarkup(5, size/2, color, t);
+    case 'hexagon': return polygonMarkup(6, size/2, color, t);
+    case 'star': return starMarkup(size/2, color, t);
+    default: return `<circle cx="${cx}" cy="${cy}" r="${size/2}" fill="${color}"/>`;
+  }
+}
+function polygonMarkup(n, r, color, transform){
+  let pts=[];
+  for(let i=0;i<n;i++){
+    const a = -Math.PI/2 + i*(2*Math.PI/n);
+    pts.push(`${(r*Math.cos(a)).toFixed(1)},${(r*Math.sin(a)).toFixed(1)}`);
+  }
+  return `<polygon points="${pts.join(' ')}" fill="${color}" transform="${transform}"/>`;
+}
+function starMarkup(r, color, transform){
+  let pts=[];
+  for(let i=0;i<10;i++){
+    const a = -Math.PI/2 + i*(Math.PI/5);
+    const rad = i%2===0 ? r : r*0.45;
+    pts.push(`${(rad*Math.cos(a)).toFixed(1)},${(rad*Math.sin(a)).toFixed(1)}`);
+  }
+  return `<polygon points="${pts.join(' ')}" fill="${color}" transform="${transform}"/>`;
+}
+
+function renderIQQuestion(){
+  const q = state.items[state.index];
+  const selected = state.answers[state.index];
+  app.innerHTML = `
+    ${progressHTML()}
+    <div class="qcard">
+      <span class="qtag">Penalaran Visual</span>
+      <div class="qtext">Lengkapi pola pada matriks 3×3 berikut. Pilih bentuk yang tepat untuk mengisi kotak kosong.</div>
+      <div class="qimg-wrap">
+        <div style="display:grid; grid-template-columns:repeat(3,86px); gap:8px; background:var(--paper-dim); padding:10px; border-radius:12px; border:1px solid var(--line);">
+          ${q.gridSVG.map(svg=>`<div style="background:var(--card); border-radius:8px; display:flex; align-items:center; justify-content:center; border:1px solid var(--line);">${svg}</div>`).join('')}
+          <div style="background:var(--card); border-radius:8px; display:flex; align-items:center; justify-content:center; border:2px dashed var(--ink); font-family:'IBM Plex Mono',monospace; color:var(--graphite); font-size:22px;">?</div>
+        </div>
+      </div>
+      <div class="opt-grid">
+        ${q.options.map((svg,i)=>`
+          <button class="opt-thumb ${selected===i?'selected':''}" onclick="selectAnswer(${i})">${svg}</button>
+        `).join('')}
+      </div>
+      ${navRowHTML()}
+      ${jumpGridHTML()}
+    </div>
+  `;
+}
+
+/* ================= MODULE 4: KEPRIBADIAN ================= */
+function startPersonality(){ beginTest('personality', PERSONALITY_ITEMS); }
+
+function renderPersonalityQuestion(){
+  const q = state.items[state.index];
+  const selected = state.answers[state.index];
+  app.innerHTML = `
+    ${progressHTML()}
+    <div class="qcard">
+      <span class="qtag">${q.scale}</span>
+      <div class="qtext serif">"${q.text}"</div>
+      <div class="options">
+        <button class="opt ${selected===true?'selected':''}" onclick="selectAnswer(true)">
+          <span class="bubble">Y</span><span>Setuju / Sesuai dengan diri saya</span>
+        </button>
+        <button class="opt ${selected===false?'selected':''}" onclick="selectAnswer(false)">
+          <span class="bubble">T</span><span>Tidak Setuju / Tidak sesuai dengan diri saya</span>
+        </button>
+      </div>
+      ${navRowHTML()}
+      ${jumpGridHTML()}
+    </div>
+  `;
+}
+
+/* ---------------- FINISH + RESULTS ---------------- */
+function finishTest(){
+  if(state.test==='tpa') return renderTPAResults();
+  if(state.test==='colorblind') return renderColorblindResults();
+  if(state.test==='iq') return renderIQResults();
+  if(state.test==='personality') return renderPersonalityResults();
+}
+
+let reviewFilter = 'all';
+function setReviewFilter(f){ reviewFilter = f; renderTPAResults(true); }
+
+function renderTPAResults(keepFilter){
+  if(!keepFilter) reviewFilter='all';
+  const items = state.items;
+  let correctCount = 0;
+  const bySubject = {};
+  items.forEach((q,i)=>{
+    const ok = state.answers[i]===q.correct;
+    if(ok) correctCount++;
+    bySubject[q.subject] = bySubject[q.subject] || {correct:0,total:0};
+    bySubject[q.subject].total++;
+    if(ok) bySubject[q.subject].correct++;
+  });
+  const pct = Math.round((correctCount/items.length)*100);
+
+  const filtered = items.map((q,i)=>({q,i})).filter(({q,i})=>{
+    const ok = state.answers[i]===q.correct;
+    if(reviewFilter==='wrong') return !ok;
+    if(reviewFilter==='correct') return ok;
+    return true;
+  });
+
+  app.innerHTML = `
+    <div class="report">
+      <div class="report-head">
+        <div class="score-badge"><div class="num">${pct}</div><div class="of">${correctCount}/${items.length}</div></div>
+        <div>
+          <span class="eyebrow">Laporan Hasil</span>
+          <h2>TPA &amp; TKDA</h2>
+          <div class="sub">Kamu menjawab benar ${correctCount} dari ${items.length} soal. Rincian per mata pelajaran ditampilkan di bawah, beserta pembahasan untuk setiap soal.</div>
+        </div>
+      </div>
+      ${Object.entries(bySubject).map(([subj,d])=>`
+        <div class="scale-row">
+          <div class="top"><span>${subj}</span><span class="mono">${d.correct}/${d.total} benar</span></div>
+          <div class="scale-bar"><div class="fill" style="width:${Math.round(d.correct/d.total*100)}%; background:var(--teal);"></div></div>
+        </div>
+      `).join('')}
+
+      <div class="filter-row">
+        <button class="filter-chip ${reviewFilter==='all'?'active':''}" onclick="setReviewFilter('all')">Semua (${items.length})</button>
+        <button class="filter-chip ${reviewFilter==='wrong'?'active':''}" onclick="setReviewFilter('wrong')">Salah (${items.length-correctCount})</button>
+        <button class="filter-chip ${reviewFilter==='correct'?'active':''}" onclick="setReviewFilter('correct')">Benar (${correctCount})</button>
+      </div>
+
+      ${filtered.map(({q,i})=>{
+        const userAns = state.answers[i];
+        const ok = userAns===q.correct;
+        return `
+          <div class="review-item ${ok?'correct':'wrong'}">
+            <span class="rtag">${ok?'BENAR':'SALAH'} · ${q.subject} · Soal ${i+1}</span>
+            <div class="rq">${q.q}</div>
+            <div class="ranswer">Jawabanmu: <b>${userAns!==undefined ? String.fromCharCode(65+userAns)+'. '+q.options[userAns] : '(tidak dijawab)'}</b></div>
+            ${!ok ? `<div class="ranswer">Jawaban benar: <b>${String.fromCharCode(65+q.correct)}. ${q.options[q.correct]}</b></div>` : ''}
+            <div class="rexp"><b>Pembahasan:</b> ${q.exp}</div>
+          </div>
+        `;
+      }).join('')}
+
+      <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn" onclick="startTPA()">Ulangi Tes</button>
+        <button class="btn ghost" onclick="goHome()">Kembali ke Beranda</button>
+      </div>
+    </div>
+  `;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderColorblindResults(){
+  const items = state.items;
+  let correctCount = 0;
+  const results = items.map((p,i)=>{
+    const userAns = state.answers[i];
+    const ok = userAns === p.number;
+    if(ok) correctCount++;
+    return {p,i,userAns,ok};
+  });
+  const pct = Math.round((correctCount/items.length)*100);
+  let interpretation, interpColor;
+  if(correctCount>=17){ interpretation="Hasil menunjukkan pola respons konsisten dengan penglihatan warna normal pada simulasi ini."; interpColor="var(--sage)"; }
+  else if(correctCount>=11){ interpretation="Terdapat beberapa lempeng yang terlewat, terutama tipe merah-hijau/biru-kuning — ini bisa mengindikasikan defisiensi warna ringan pada simulasi ini, namun juga bisa dipengaruhi kalibrasi layar."; interpColor="var(--coral)"; }
+  else { interpretation="Banyak lempeng terlewat pada simulasi ini, termasuk lempeng kontrol dasar — disarankan melakukan pemeriksaan Ishihara resmi oleh dokter mata untuk hasil yang akurat."; interpColor="var(--coral)"; }
+
+  app.innerHTML = `
+    <div class="report">
+      <div class="report-head">
+        <div class="score-badge"><div class="num">${correctCount}</div><div class="of">/${items.length} lempeng</div></div>
+        <div>
+          <span class="eyebrow">Laporan Hasil</span>
+          <h2>Tes Buta Warna (Simulasi)</h2>
+          <div class="sub" style="color:${interpColor}">${interpretation}</div>
+        </div>
+      </div>
+      <div class="disclaimer"><b>Disclaimer:</b> Lempeng pada tes ini digambar prosedural (bukan gambar Ishihara asli berhak cipta), dan hasil sangat dipengaruhi kalibrasi warna layar perangkatmu. Ini adalah alat skrining edukatif, <b>bukan diagnosis medis</b>. Untuk hasil resmi dan akurat, lakukan tes Ishihara di dokter spesialis mata / optometris.</div>
+
+      <div style="margin-top:20px;">
+      ${results.map(({p,i,userAns,ok})=>`
+        <div class="review-item ${ok?'correct':'wrong'}">
+          <span class="rtag">${ok?'BENAR':'BERBEDA'} · Lempeng ${i+1} · Tipe ${p.type}</span>
+          <div class="rq">Jawabanmu: <b>${userAns ?? '(tidak dijawab)'}</b> — Angka target: <b>${p.number}</b></div>
+          <div class="rexp">${p.note}</div>
+        </div>
+      `).join('')}
+      </div>
+
+      <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn" onclick="startColorblind()">Ulangi Tes</button>
+        <button class="btn ghost" onclick="goHome()">Kembali ke Beranda</button>
+      </div>
+    </div>
+  `;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderIQResults(){
+  const items = state.items;
+  let correctCount = 0;
+  const results = items.map((q,i)=>{
+    const userAns = state.answers[i];
+    const ok = userAns === q.correct;
+    if(ok) correctCount++;
+    return {q,i,userAns,ok};
+  });
+  const pct = Math.round((correctCount/items.length)*100);
+  let band;
+  if(pct>=85) band="Sangat Tinggi";
+  else if(pct>=70) band="Tinggi";
+  else if(pct>=50) band="Rata-rata";
+  else band="Perlu Latihan Lebih";
+
+  app.innerHTML = `
+    <div class="report">
+      <div class="report-head">
+        <div class="score-badge"><div class="num">${pct}</div><div class="of">skor</div></div>
+        <div>
+          <span class="eyebrow">Laporan Hasil</span>
+          <h2>Tes IQ Bergambar</h2>
+          <div class="sub">Kamu menjawab benar ${correctCount} dari ${items.length} soal penalaran visual. Kategori: <b>${band}</b>. Skor ini menggambarkan kemampuan penalaran pola pada simulasi ini, bukan skor IQ terstandardisasi resmi.</div>
+        </div>
+      </div>
+
+      ${results.map(({q,i,userAns,ok})=>`
+        <div class="review-item ${ok?'correct':'wrong'}">
+          <span class="rtag">${ok?'BENAR':'SALAH'} · Soal ${i+1}</span>
+          <div class="rq">Kamu memilih opsi ${userAns!==undefined ? (userAns+1) : '(tidak dijawab)'}${!ok?`, jawaban benar adalah opsi ${q.correct+1}`:''}.</div>
+          <div class="rexp"><b>Pola aturan:</b> ${q.exp}</div>
+        </div>
+      `).join('')}
+
+      <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn" onclick="startIQ()">Ulangi Tes</button>
+        <button class="btn ghost" onclick="goHome()">Kembali ke Beranda</button>
+      </div>
+    </div>
+  `;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderPersonalityResults(){
+  const items = state.items;
+  const scaleScores = {};
+  items.forEach((it,i)=>{
+    scaleScores[it.scale] = scaleScores[it.scale] || {sum:0,max:0};
+    const ans = state.answers[i]; // true/false
+    const agree = ans===true;
+    const val = it.reverse ? (agree?0:1) : (agree?1:0);
+    scaleScores[it.scale].sum += val;
+    scaleScores[it.scale].max += 1;
+  });
+
+  function levelLabel(ratio){
+    if(ratio>=0.7) return {label:'Tinggi', color:'var(--sage)'};
+    if(ratio>=0.4) return {label:'Sedang', color:'var(--teal)'};
+    return {label:'Rendah', color:'var(--coral)'};
+  }
+
+  app.innerHTML = `
+    <div class="report">
+      <div class="report-head">
+        <div class="score-badge" style="border-color:var(--teal);"><div class="num" style="font-size:22px;">40/40</div><div class="of">terjawab</div></div>
+        <div>
+          <span class="eyebrow">Laporan Hasil</span>
+          <h2>Inventori Kepribadian</h2>
+          <div class="sub">Berikut gambaran 8 dimensi kepribadianmu berdasarkan jawabanmu. Ini adalah profil reflektif, bukan diagnosis.</div>
+        </div>
+      </div>
+
+      ${Object.entries(scaleScores).map(([scale,d])=>{
+        const ratio = d.sum/d.max;
+        const lvl = levelLabel(ratio);
+        return `
+          <div class="scale-row">
+            <div class="top"><span>${scale}</span><span class="lvl" style="color:${lvl.color}; border-color:${lvl.color};">${lvl.label}</span></div>
+            <div class="scale-bar"><div class="fill" style="width:${Math.round(ratio*100)}%; background:${lvl.color};"></div></div>
+          </div>
+        `;
+      }).join('')}
+
+      <div class="disclaimer" style="margin-top:18px;">
+        <b>Disclaimer penting:</b> Modul ini <i>terinspirasi</i> oleh struktur inventori kepribadian seperti MMPI, namun seluruh pernyataan bersifat orisinal dan disusun untuk simulasi/edukasi, <b>bukan salinan tes MMPI resmi yang berhak cipta dan bukan alat diagnostik klinis</b>. Hasil di atas tidak dapat digunakan untuk menegakkan diagnosis kondisi kesehatan mental apa pun. Jika kamu memiliki kekhawatiran mengenai kesejahteraan emosional atau mental, silakan berkonsultasi dengan psikolog atau psikiater berlisensi.
+      </div>
+
+      <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn" onclick="startPersonality()">Ulangi Tes</button>
+        <button class="btn ghost" onclick="goHome()">Kembali ke Beranda</button>
+      </div>
+    </div>
+  `;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ---------------- INIT ---------------- */
+renderHome();
+
+</script>
+</body>
+</html>
